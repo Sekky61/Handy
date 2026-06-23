@@ -12,6 +12,7 @@
   "sidebar": {
     "general": "General",
     "models": "Models",
+    "stt": "STT",
     "advanced": "Advanced",
     "postProcessing": "Post Process",
     "history": "History",
@@ -398,6 +399,34 @@
       "fillerWordRemoval": {
         "title": "Remove Filler Words",
         "description": "Removes common hesitation words from transcriptions. Turn off to keep them."
+      }
+    },
+    "stt": {
+      "title": "Speech to Text",
+      "backend": {
+        "title": "Backend",
+        "description": "Choose whether Handy transcribes locally or sends recordings to OpenRouter STT.",
+        "local": "Local",
+        "openRouter": "OpenRouter"
+      },
+      "api": {
+        "title": "API",
+        "provider": {
+          "title": "Provider",
+          "description": "Select a speech-to-text provider. Only OpenRouter is available for now."
+        },
+        "apiKey": {
+          "title": "API Key",
+          "description": "OpenRouter API key used for remote transcription.",
+          "placeholder": "sk-or-..."
+        },
+        "model": {
+          "title": "Model",
+          "description": "Choose an OpenRouter transcription model.",
+          "placeholderWithOptions": "Search or select a model",
+          "placeholderNoOptions": "Type a model name",
+          "refreshModels": "Refresh models"
+        }
       }
     },
     "postProcessing": {

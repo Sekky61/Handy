@@ -16,7 +16,8 @@
     "postProcessing": "후처리",
     "history": "히스토리",
     "debug": "디버그",
-    "about": "정보"
+    "about": "정보",
+    "stt": "STT"
   },
   "onboarding": {
     "subtitle": "시작하려면 음성 인식 모델을 선택하세요",
@@ -634,6 +635,34 @@
       "whatsNewUpdates": {
         "label": "새 소식 표시",
         "description": "Handy 업데이트 후 릴리스 노트를 표시합니다"
+      }
+    },
+    "stt": {
+      "title": "Speech to Text",
+      "backend": {
+        "title": "Backend",
+        "description": "Choose whether Handy transcribes locally or sends recordings to OpenRouter STT.",
+        "local": "Local",
+        "openRouter": "OpenRouter"
+      },
+      "api": {
+        "title": "API",
+        "provider": {
+          "title": "Provider",
+          "description": "Select a speech-to-text provider. Only OpenRouter is available for now."
+        },
+        "apiKey": {
+          "title": "API Key",
+          "description": "OpenRouter API key used for remote transcription.",
+          "placeholder": "sk-or-..."
+        },
+        "model": {
+          "title": "Model",
+          "description": "Choose an OpenRouter transcription model.",
+          "placeholderWithOptions": "Search or select a model",
+          "placeholderNoOptions": "Type a model name",
+          "refreshModels": "Refresh models"
+        }
       }
     }
   },

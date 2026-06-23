@@ -20,6 +20,8 @@ mod secure_input;
 mod settings;
 mod shortcut;
 mod signal_handle;
+mod stt_client;
+mod stt_settings;
 mod transcription_coordinator;
 mod tray;
 mod tray_i18n;
@@ -682,6 +684,11 @@ pub fn run(cli_args: CliArgs) {
             shortcut::change_post_process_model_setting,
             shortcut::set_post_process_provider,
             shortcut::fetch_post_process_models,
+            commands::stt::change_stt_backend_setting,
+            commands::stt::set_stt_provider,
+            commands::stt::change_stt_api_key_setting,
+            commands::stt::change_stt_model_setting,
+            commands::stt::fetch_stt_models,
             shortcut::add_post_process_prompt,
             shortcut::update_post_process_prompt,
             shortcut::delete_post_process_prompt,

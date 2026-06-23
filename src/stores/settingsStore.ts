@@ -23,6 +23,7 @@ interface SettingsStore {
   postProcessModelOptions: Record<string, string[]>;
   // null until loadUpdateChecksLocked() resolves
   updateChecksLocked: boolean | null;
+  sttModelOptions: Record<string, string[]>;
 
   // Actions
   initialize: () => Promise<void>;
@@ -59,6 +60,11 @@ interface SettingsStore {
   updatePostProcessModel: (providerId: string, model: string) => Promise<void>;
   fetchPostProcessModels: (providerId: string) => Promise<string[]>;
   setPostProcessModelOptions: (providerId: string, models: string[]) => void;
+  setSttProvider: (providerId: string) => Promise<void>;
+  updateSttApiKey: (providerId: string, apiKey: string) => Promise<void>;
+  updateSttModel: (providerId: string, model: string) => Promise<void>;
+  fetchSttModels: (providerId: string) => Promise<string[]>;
+  setSttModelOptions: (providerId: string, models: string[]) => void;
 
   // Internal state setters
   setSettings: (settings: Settings | null) => void;
@@ -156,6 +162,7 @@ const settingUpdaters: {
   history_limit: (value) => commands.updateHistoryLimit(value as number),
   post_process_enabled: (value) =>
     commands.changePostProcessEnabledSetting(value as boolean),
+  stt_backend: (value) => commands.changeSttBackendSetting(value as string),
   post_process_selected_prompt_id: (value) =>
     commands.setPostProcessSelectedPrompt(value as string),
   mute_while_recording: (value) =>
@@ -207,6 +214,7 @@ export const useSettingsStore = create<SettingsStore>()(
     customSounds: { start: false, stop: false },
     postProcessModelOptions: {},
     updateChecksLocked: null,
+    sttModelOptions: {},
 
     // Internal setters
     setSettings: (settings) => set({ settings }),
@@ -594,6 +602,105 @@ export const useSettingsStore = create<SettingsStore>()(
       set((state) => ({
         postProcessModelOptions: {
           ...state.postProcessModelOptions,
+          [providerId]: models,
+        },
+      })),
+
+    setSttProvider: async (providerId) => {
+      const { settings, setUpdating, refreshSettings, setSttModelOptions } =
+        get();
+      const updateKey = "stt_provider_id";
+      const previousId = settings?.stt_provider_id ?? null;
+
+      setUpdating(updateKey, true);
+      if (settings) {
+        set((state) => ({
+          settings: state.settings
+            ? { ...state.settings, stt_provider_id: providerId }
+            : null,
+        }));
+      }
+      setSttModelOptions(providerId, []);
+
+      try {
+        await commands.setSttProvider(providerId);
+        await refreshSettings();
+      } catch (error) {
+        console.error("Failed to set STT provider:", error);
+        if (previousId !== null) {
+          set((state) => ({
+            settings: state.settings
+              ? { ...state.settings, stt_provider_id: previousId }
+              : null,
+          }));
+        }
+      } finally {
+        setUpdating(updateKey, false);
+      }
+    },
+
+    updateSttApiKey: async (providerId, apiKey) => {
+      const updateKey = `stt_api_key:${providerId}`;
+      const { setUpdating, refreshSettings } = get();
+
+      set((state) => ({
+        sttModelOptions: {
+          ...state.sttModelOptions,
+          [providerId]: [],
+        },
+      }));
+      setUpdating(updateKey, true);
+
+      try {
+        await commands.changeSttApiKeySetting(providerId, apiKey);
+        await refreshSettings();
+      } catch (error) {
+        console.error("Failed to update STT API key:", error);
+      } finally {
+        setUpdating(updateKey, false);
+      }
+    },
+
+    updateSttModel: async (providerId, model) => {
+      const updateKey = `stt_model:${providerId}`;
+      const { setUpdating, refreshSettings } = get();
+
+      setUpdating(updateKey, true);
+      try {
+        await commands.changeSttModelSetting(providerId, model);
+        await refreshSettings();
+      } catch (error) {
+        console.error("Failed to update STT model:", error);
+      } finally {
+        setUpdating(updateKey, false);
+      }
+    },
+
+    fetchSttModels: async (providerId) => {
+      const updateKey = `stt_models_fetch:${providerId}`;
+      const { setUpdating, setSttModelOptions } = get();
+
+      setUpdating(updateKey, true);
+      try {
+        const result = await commands.fetchSttModels(providerId);
+        if (result.status === "ok") {
+          setSttModelOptions(providerId, result.data);
+          return result.data;
+        }
+        console.error("Failed to fetch STT models:", result.error);
+        return [];
+      } catch (error) {
+        console.error("Failed to fetch STT models:", error);
+        return [];
+      } finally {
+        setUpdating(updateKey, false);
+      }
+    },
+
+    setSttModelOptions: (providerId, models) =>
+      set((state) => ({
+        sttModelOptions: {
+          ...state.sttModelOptions,
           [providerId]: models,
         },
       })),

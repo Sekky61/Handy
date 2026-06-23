@@ -8,6 +8,12 @@ use std::fmt;
 use tauri::AppHandle;
 use tauri_plugin_store::StoreExt;
 
+pub use crate::stt_settings::SttBackend;
+use crate::stt_settings::{
+    default_stt_api_keys, default_stt_models, default_stt_provider_id, default_stt_providers,
+    ensure_stt_defaults,
+};
+
 pub const APPLE_INTELLIGENCE_PROVIDER_ID: &str = "apple_intelligence";
 pub const APPLE_INTELLIGENCE_DEFAULT_MODEL_ID: &str = "Apple Intelligence";
 
@@ -353,6 +359,12 @@ impl std::ops::DerefMut for SecretMap {
     }
 }
 
+impl SecretMap {
+    pub(crate) fn new(map: HashMap<String, String>) -> Self {
+        SecretMap(map)
+    }
+}
+
 /* still handy for composing the initial JSON in the store ------------- */
 /// The container-level `serde(default)` (backed by the `Default` impl below)
 /// guarantees every field — including ones added in the future — falls back to
@@ -457,6 +469,16 @@ pub struct AppSettings {
     pub post_process_prompts: Vec<LLMPrompt>,
     #[serde(default)]
     pub post_process_selected_prompt_id: Option<String>,
+    #[serde(default)]
+    pub stt_backend: SttBackend,
+    #[serde(default = "default_stt_provider_id")]
+    pub stt_provider_id: String,
+    #[serde(default = "default_stt_providers")]
+    pub stt_providers: Vec<PostProcessProvider>,
+    #[serde(default = "default_stt_api_keys")]
+    pub stt_api_keys: SecretMap,
+    #[serde(default = "default_stt_models")]
+    pub stt_models: HashMap<String, String>,
     #[serde(default)]
     pub mute_while_recording: bool,
     #[serde(default)]
@@ -948,6 +970,11 @@ pub fn get_default_settings() -> AppSettings {
         post_process_models: default_post_process_models(),
         post_process_prompts: default_post_process_prompts(),
         post_process_selected_prompt_id: None,
+        stt_backend: SttBackend::default(),
+        stt_provider_id: default_stt_provider_id(),
+        stt_providers: default_stt_providers(),
+        stt_api_keys: default_stt_api_keys(),
+        stt_models: default_stt_models(),
         mute_while_recording: false,
         append_trailing_space: false,
         app_language: default_app_language(),
@@ -984,6 +1011,18 @@ impl AppSettings {
         self.post_process_providers
             .iter()
             .find(|provider| provider.id == self.post_process_provider_id)
+    }
+
+    pub fn active_stt_provider(&self) -> Option<&PostProcessProvider> {
+        self.stt_providers
+            .iter()
+            .find(|provider| provider.id == self.stt_provider_id)
+    }
+
+    pub fn stt_provider(&self, provider_id: &str) -> Option<&PostProcessProvider> {
+        self.stt_providers
+            .iter()
+            .find(|provider| provider.id == provider_id)
     }
 
     pub fn post_process_provider(&self, provider_id: &str) -> Option<&PostProcessProvider> {
@@ -1052,7 +1091,9 @@ pub fn get_settings(app: &AppHandle) -> AppSettings {
         default_settings
     };
 
-    if ensure_post_process_defaults(&mut settings) {
+    let post_process_defaults_changed = ensure_post_process_defaults(&mut settings);
+    let stt_defaults_changed = ensure_stt_defaults(&mut settings);
+    if post_process_defaults_changed || stt_defaults_changed {
         store.set("settings", serde_json::to_value(&settings).unwrap());
     }
 

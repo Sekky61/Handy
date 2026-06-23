@@ -12,6 +12,7 @@ interface UseSettingsReturn {
   audioFeedbackEnabled: boolean;
   postProcessModelOptions: Record<string, string[]>;
   updateChecksLocked: boolean | null;
+  sttModelOptions: Record<string, string[]>;
 
   // Actions
   updateSetting: <K extends keyof Settings>(
@@ -42,6 +43,12 @@ interface UseSettingsReturn {
   ) => Promise<void>;
   updatePostProcessModel: (providerId: string, model: string) => Promise<void>;
   fetchPostProcessModels: (providerId: string) => Promise<string[]>;
+
+  // STT helpers
+  setSttProvider: (providerId: string) => Promise<void>;
+  updateSttApiKey: (providerId: string, apiKey: string) => Promise<void>;
+  updateSttModel: (providerId: string, model: string) => Promise<void>;
+  fetchSttModels: (providerId: string) => Promise<string[]>;
 }
 
 export const useSettings = (): UseSettingsReturn => {
@@ -63,6 +70,7 @@ export const useSettings = (): UseSettingsReturn => {
     audioFeedbackEnabled: store.settings?.audio_feedback || false,
     postProcessModelOptions: store.postProcessModelOptions,
     updateChecksLocked: store.updateChecksLocked,
+    sttModelOptions: store.sttModelOptions,
     updateSetting: store.updateSetting,
     resetSetting: store.resetSetting,
     refreshSettings: store.refreshSettings,
@@ -76,5 +84,9 @@ export const useSettings = (): UseSettingsReturn => {
     updatePostProcessApiKey: store.updatePostProcessApiKey,
     updatePostProcessModel: store.updatePostProcessModel,
     fetchPostProcessModels: store.fetchPostProcessModels,
+    setSttProvider: store.setSttProvider,
+    updateSttApiKey: store.updateSttApiKey,
+    updateSttModel: store.updateSttModel,
+    fetchSttModels: store.fetchSttModels,
   };
 };

@@ -16,7 +16,8 @@
     "postProcessing": "後処理",
     "history": "履歴",
     "debug": "デバッグ",
-    "about": "概要"
+    "about": "概要",
+    "stt": "STT"
   },
   "onboarding": {
     "subtitle": "開始するには、文字起こしのモデルを選択してください",
@@ -634,6 +635,34 @@
       "whatsNewUpdates": {
         "label": "新機能を表示",
         "description": "Handy のアップデート後にリリースノートを表示"
+      }
+    },
+    "stt": {
+      "title": "Speech to Text",
+      "backend": {
+        "title": "Backend",
+        "description": "Choose whether Handy transcribes locally or sends recordings to OpenRouter STT.",
+        "local": "Local",
+        "openRouter": "OpenRouter"
+      },
+      "api": {
+        "title": "API",
+        "provider": {
+          "title": "Provider",
+          "description": "Select a speech-to-text provider. Only OpenRouter is available for now."
+        },
+        "apiKey": {
+          "title": "API Key",
+          "description": "OpenRouter API key used for remote transcription.",
+          "placeholder": "sk-or-..."
+        },
+        "model": {
+          "title": "Model",
+          "description": "Choose an OpenRouter transcription model.",
+          "placeholderWithOptions": "Search or select a model",
+          "placeholderNoOptions": "Type a model name",
+          "refreshModels": "Refresh models"
+        }
       }
     }
   },

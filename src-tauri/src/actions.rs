@@ -7,7 +7,9 @@ use crate::managers::history::HistoryManager;
 use crate::managers::model::ModelManager;
 use crate::managers::transcription::StreamWorkKind;
 use crate::managers::transcription::TranscriptionManager;
-use crate::settings::{get_settings, AppSettings, OverlayStyle, APPLE_INTELLIGENCE_PROVIDER_ID};
+use crate::settings::{
+    get_settings, AppSettings, OverlayStyle, SttBackend, APPLE_INTELLIGENCE_PROVIDER_ID,
+};
 use crate::shortcut;
 use crate::tray::{set_tray_state, TrayIconState};
 use crate::utils::{
@@ -474,9 +476,14 @@ impl ShortcutAction for TranscribeAction {
         let tm = app.state::<Arc<TranscriptionManager>>();
         let rm = app.state::<Arc<AudioRecordingManager>>();
 
-        // Load ASR model and VAD model in parallel
+        // Load ASR model and VAD model in parallel. Remote STT backends do not need
+        // the local ASR model, but VAD is still used for recording.
+        let settings = get_settings(app);
+        let uses_local_stt = settings.stt_backend == SttBackend::Local;
         let kickoff_started = Instant::now();
-        tm.initiate_model_load();
+        if uses_local_stt {
+            tm.initiate_model_load();
+        }
         let rm_clone = Arc::clone(&rm);
         std::thread::spawn(move || {
             if let Err(e) = rm_clone.preload_vad() {
@@ -492,20 +499,23 @@ impl ShortcutAction for TranscribeAction {
 
         // Get the microphone mode to determine audio feedback timing
         let plan_started = Instant::now();
-        let settings = get_settings(app);
         let is_always_on = settings.always_on_microphone;
 
-        let selected_model_info = app
-            .state::<Arc<ModelManager>>()
-            .get_model_info(&settings.selected_model);
+        let selected_model_info = if uses_local_stt {
+            app.state::<Arc<ModelManager>>()
+                .get_model_info(&settings.selected_model)
+        } else {
+            None
+        };
 
         // Use the app-facing model capability as the single pre-recording source
         // for live streaming decisions. Unknown support is represented as false
         // until the model registry is updated by discovery or runtime load.
-        let model_supports_streaming = selected_model_info
-            .as_ref()
-            .map(|m| m.supports_streaming)
-            .unwrap_or(false);
+        let model_supports_streaming = uses_local_stt
+            && selected_model_info
+                .as_ref()
+                .map(|m| m.supports_streaming)
+                .unwrap_or(false);
         let vad_policy = if !settings.vad_enabled {
             VadPolicy::Disabled
         } else if model_supports_streaming {
@@ -716,16 +726,50 @@ impl ShortcutAction for TranscribeAction {
                     // running, finalize it and use its text (all audio was already
                     // fed to the stream); otherwise batch-transcribe the samples.
                     let transcription_time = Instant::now();
-                    let transcription_result = match tm.finalize_stream() {
-                        // A finalized stream with usable text wins. An empty result
-                        // (no active stream, produced nothing, or a finalize error
-                        // after the engine was returned) falls back to a full batch
-                        // transcription of the same audio. A finalize timeout is
-                        // surfaced instead — the worker may still hold the engine,
-                        // so a batch fallback would contend with it.
-                        Ok(Some(text)) if !text.trim().is_empty() => Ok(text),
-                        Ok(_) => tm.transcribe(samples),
-                        Err(err) => Err(err),
+                    let settings = get_settings(&ah);
+                    let transcription_result = if settings.stt_backend == SttBackend::OpenRouter {
+                        let provider = settings
+                            .active_stt_provider()
+                            .cloned()
+                            .ok_or_else(|| "No STT provider is selected".to_string());
+
+                        match provider {
+                            Ok(provider) => {
+                                let api_key = settings
+                                    .stt_api_keys
+                                    .get(&provider.id)
+                                    .cloned()
+                                    .unwrap_or_default();
+                                let model = settings
+                                    .stt_models
+                                    .get(&provider.id)
+                                    .cloned()
+                                    .unwrap_or_default();
+                                let language = Some(settings.selected_language.clone());
+
+                                crate::stt_client::transcribe_openrouter(
+                                    &provider,
+                                    api_key,
+                                    &model,
+                                    &samples,
+                                    language,
+                                )
+                                .await
+                            }
+                            Err(err) => Err(err),
+                        }
+                    } else {
+                        match tm.finalize_stream() {
+                            // A finalized stream with usable text wins. An empty result
+                            // (no active stream, produced nothing, or a finalize error
+                            // after the engine was returned) falls back to a full batch
+                            // transcription of the same audio. A finalize timeout is
+                            // surfaced instead — the worker may still hold the engine,
+                            // so a batch fallback would contend with it.
+                            Ok(Some(text)) if !text.trim().is_empty() => Ok(text),
+                            Ok(_) => tm.transcribe(samples).map_err(|err| err.to_string()),
+                            Err(err) => Err(err.to_string()),
+                        }
                     };
 
                     // Await WAV save and verify
