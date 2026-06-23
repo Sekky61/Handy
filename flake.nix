@@ -221,6 +221,7 @@
               cargo
               rust-analyzer
               clippy
+              rustfmt
               # Frontend
               nodejs
               bun
@@ -236,6 +237,7 @@
               ORT_PREFER_DYNAMIC_LINK
               GST_PLUGIN_SYSTEM_PATH_1_0;
 
+            RUST_SRC_PATH = "${pkgs.rustPlatform.rustLibSrc}";
             LD_LIBRARY_PATH = "${pkgs.lib.makeLibraryPath [ pkgs.libayatana-appindicator pkgs.onnxruntime pkgs.vulkan-loader ]}";
 
             # Same as wrapGAppsHook4
