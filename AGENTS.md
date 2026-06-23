@@ -2,6 +2,16 @@
 
 This file provides guidance to AI coding assistants working with code in this repository.
 
+## Repository and Fork Workflow
+
+This checkout is maintained through the `fork` branch on the personal fork:
+
+- Work on branch `fork`, not on temporary `t3code/*` or upstream branches.
+- `origin` points to `git@github.com:Sekky61/Handy.git`; push completed changes to `origin/fork`.
+- Amend the existing commit that owns a change when requested, then update the remote branch with `git push --force-with-lease origin fork`.
+- The repository's Nix flake builds Handy from `self`; there is no separate `handy` flake input. Therefore `nix flake update handy` is expected to do nothing. To test a change, use the checked-out `fork` branch directly (for example, `nix build .#handy`).
+- Before pushing, verify `git status`, the commit at `HEAD`, and that `origin/fork` points to the same commit.
+
 ## Development Commands
 
 **Prerequisites:**
@@ -216,3 +226,13 @@ See the [Troubleshooting](README.md#troubleshooting) section in README.md.
 - **Full contributor workflow:** [CONTRIBUTING.md](CONTRIBUTING.md).
 
 **Commits:** Use conventional commit prefixes (`feat:`, `fix:`, `docs:`, `refactor:`, `chore:`). Focus the message on _why_, not _what_.
+
+---
+
+# Fork-specific notes
+
+- Think about future conflicts and architecture changes in a way that allows for easy upstream sync
+- Fork commits are feature units: each fork-only feature should normally be represented by a single commit on top of upstream.
+- Before committing fork-only changes, check whether the touched files already belong to an existing fork commit, for example with `git log --oneline upstream/main..HEAD -- <changed-files>`.
+- Small fixes, follow-ups, documentation tweaks, and conflict-resolution improvements for an existing fork feature must be amended/squashed into that feature's commit, not left as a second commit.
+- If a fix needs independent testing, it may temporarily be a top-of-branch fixup commit. After the user tests and explicitly approves it — or asks to "save" the approved change — amend/squash it into the original feature commit instead of leaving a separate follow-up commit.
