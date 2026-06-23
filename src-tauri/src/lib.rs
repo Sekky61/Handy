@@ -96,6 +96,34 @@ fn build_console_filter() -> env_filter::Filter {
     builder.build()
 }
 
+fn cli_arg_present(args: &[String], flag: &str) -> bool {
+    args.iter().any(|arg| arg == flag)
+}
+
+fn handle_single_instance_cli_args(app: &AppHandle, args: &[String]) {
+    let post_process = cli_arg_present(args, "--post-process");
+
+    if cli_arg_present(args, "--cancel") {
+        crate::utils::cancel_current_operation(app);
+    } else if cli_arg_present(args, "--stop-recording") {
+        signal_handle::stop_recording(app, "CLI");
+    } else if cli_arg_present(args, "--start-recording") {
+        signal_handle::start_recording(app, post_process, "CLI");
+    } else if cli_arg_present(args, "--toggle-recording") {
+        signal_handle::toggle_recording(app, post_process, "CLI");
+    } else if cli_arg_present(args, "--toggle-post-process") {
+        signal_handle::toggle_recording(app, true, "CLI");
+    } else if cli_arg_present(args, "--toggle-transcription") {
+        signal_handle::toggle_recording(app, false, "CLI");
+    } else {
+        // A second process without control flags should raise the window.
+        // Recreate a vanished macOS tray icon at the same time.
+        #[cfg(target_os = "macos")]
+        tray::recreate_tray_icon(app);
+        show_main_window(app);
+    }
+}
+
 fn show_main_window(app: &AppHandle) {
     if let Some(main_window) = app.get_webview_window("main") {
         if let Err(e) = main_window.unminimize() {
@@ -857,23 +885,7 @@ pub fn run(cli_args: CliArgs) {
     // instance instead.
     if !headless_mode {
         builder = builder.plugin(tauri_plugin_single_instance::init(|app, args, _cwd| {
-            if args.iter().any(|a| a == "--toggle-transcription") {
-                signal_handle::send_transcription_input(app, "transcribe", "CLI");
-            } else if args.iter().any(|a| a == "--toggle-post-process") {
-                signal_handle::send_transcription_input(app, "transcribe_with_post_process", "CLI");
-            } else if args.iter().any(|a| a == "--cancel") {
-                crate::utils::cancel_current_operation(app);
-            } else {
-                // A second process was launched without remote-control flags
-                // (e.g. the binary run from a shell). On macOS, relaunching the
-                // bundle from Spotlight/Finder/Dock does not start a process —
-                // it arrives as RunEvent::Reopen below — but treat this the
-                // same way: raise the window and recreate a possibly vanished
-                // tray icon (#1948).
-                #[cfg(target_os = "macos")]
-                tray::recreate_tray_icon(app);
-                show_main_window(app);
-            }
+            handle_single_instance_cli_args(app, &args);
         }));
     }
 

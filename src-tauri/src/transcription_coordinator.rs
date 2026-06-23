@@ -79,6 +79,26 @@ struct Hold {
     locked: bool,
 }
 
+/// Commands processed sequentially by the coordinator thread.
+enum Command {
+    Input(InputEvent),
+    StartRecording {
+        post_process: bool,
+        source: String,
+    },
+    StopRecording {
+        source: String,
+    },
+    ToggleRecording {
+        post_process: bool,
+        source: String,
+    },
+    Cancel {
+        recording_was_active: bool,
+    },
+    ProcessingFinished,
+}
+
 /// What to do with an input that arrives while the pipeline is busy
 /// (`Stage::Processing`). `remembered` is the press for the same binding
 /// already waiting for the pipeline to drain, if any.
@@ -571,6 +591,49 @@ impl TranscriptionCoordinator {
                                 run_effect(&app, &mut state, effect);
                             }
                         }
+                        Command::StartRecording {
+                            post_process,
+                            source,
+                        } => {
+                            if matches!(&state.stage, Stage::Idle) {
+                                let binding_id = binding_id_for_post_process(post_process);
+                                let effect = state.begin_recording(binding_id.to_string(), source);
+                                run_effect(&app, &mut state, effect);
+                            } else if matches!(&state.stage, Stage::Recording(_)) {
+                                debug!(
+                                    "Ignoring start recording from '{source}': already recording"
+                                );
+                            } else {
+                                debug!("Ignoring start recording from '{source}': pipeline busy");
+                            }
+                        }
+                        Command::StopRecording { source } => {
+                            if let Stage::Recording(binding_id) = &state.stage {
+                                let binding_id = binding_id.clone();
+                                let effect = state.begin_processing(binding_id, source);
+                                run_effect(&app, &mut state, effect);
+                            } else if matches!(&state.stage, Stage::Idle) {
+                                debug!("Ignoring stop recording from '{source}': idle");
+                            } else {
+                                debug!("Ignoring stop recording from '{source}': pipeline busy");
+                            }
+                        }
+                        Command::ToggleRecording {
+                            post_process,
+                            source,
+                        } => {
+                            if matches!(&state.stage, Stage::Idle) {
+                                let binding_id = binding_id_for_post_process(post_process);
+                                let effect = state.begin_recording(binding_id.to_string(), source);
+                                run_effect(&app, &mut state, effect);
+                            } else if let Stage::Recording(binding_id) = &state.stage {
+                                let binding_id = binding_id.clone();
+                                let effect = state.begin_processing(binding_id, source);
+                                run_effect(&app, &mut state, effect);
+                            } else {
+                                debug!("Ignoring toggle recording from '{source}': pipeline busy");
+                            }
+                        }
                         Command::Cancel {
                             recording_was_active,
                         } => state.on_cancel(recording_was_active),
@@ -649,6 +712,44 @@ impl TranscriptionCoordinator {
         }
     }
 
+    pub fn start_recording(&self, post_process: bool, source: &str) {
+        if self
+            .tx
+            .send(Command::StartRecording {
+                post_process,
+                source: source.to_string(),
+            })
+            .is_err()
+        {
+            warn!("Transcription coordinator channel closed");
+        }
+    }
+
+    pub fn stop_recording(&self, source: &str) {
+        if self
+            .tx
+            .send(Command::StopRecording {
+                source: source.to_string(),
+            })
+            .is_err()
+        {
+            warn!("Transcription coordinator channel closed");
+        }
+    }
+
+    pub fn toggle_recording(&self, post_process: bool, source: &str) {
+        if self
+            .tx
+            .send(Command::ToggleRecording {
+                post_process,
+                source: source.to_string(),
+            })
+            .is_err()
+        {
+            warn!("Transcription coordinator channel closed");
+        }
+    }
+
     pub fn notify_cancel(&self, recording_was_active: bool) {
         if self
             .tx
@@ -665,6 +766,14 @@ impl TranscriptionCoordinator {
         if self.tx.send(Command::ProcessingFinished).is_err() {
             warn!("Transcription coordinator channel closed");
         }
+    }
+}
+
+fn binding_id_for_post_process(post_process: bool) -> &'static str {
+    if post_process {
+        "transcribe_with_post_process"
+    } else {
+        "transcribe"
     }
 }
 

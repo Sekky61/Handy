@@ -12,11 +12,27 @@ pub struct CliArgs {
     #[arg(long)]
     pub no_tray: bool,
 
-    /// Toggle transcription on/off (sent to running instance)
+    /// Start recording if idle (sent to running instance)
+    #[arg(long)]
+    pub start_recording: bool,
+
+    /// Stop the active recording if one is running (sent to running instance)
+    #[arg(long)]
+    pub stop_recording: bool,
+
+    /// Toggle recording on/off (sent to running instance)
+    #[arg(long)]
+    pub toggle_recording: bool,
+
+    /// Apply AI post-processing to start/toggle recording commands
+    #[arg(long)]
+    pub post_process: bool,
+
+    /// Toggle transcription on/off (legacy alias for --toggle-recording)
     #[arg(long)]
     pub toggle_transcription: bool,
 
-    /// Toggle transcription with post-processing on/off (sent to running instance)
+    /// Toggle transcription with post-processing on/off (legacy alias for --toggle-recording --post-process)
     #[arg(long)]
     pub toggle_post_process: bool,
 
