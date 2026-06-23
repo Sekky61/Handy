@@ -160,6 +160,13 @@ fn strip_think_block(s: &str) -> &str {
     s
 }
 
+fn log_post_process_output(provider_id: &str, output: &str) {
+    debug!(
+        "Post-processing output for provider '{}': '{}'",
+        provider_id, output
+    );
+}
+
 /// Build a system prompt from the user's prompt template.
 /// Removes `${output}` placeholder since the transcription is sent as the user message.
 fn build_system_prompt(prompt_template: &str) -> String {
@@ -325,6 +332,7 @@ async fn post_process_transcription(
                             PostProcessOutcome::Failed
                         } else {
                             let result = strip_invisible_chars(&result);
+                            log_post_process_output(&provider.id, &result);
                             debug!(
                                 "Apple Intelligence post-processing succeeded. Output length: {} chars",
                                 result.len()
@@ -379,6 +387,7 @@ async fn post_process_transcription(
                             json.get(TRANSCRIPTION_FIELD).and_then(|t| t.as_str())
                         {
                             let result = strip_invisible_chars(transcription_value);
+                            log_post_process_output(&provider.id, &result);
                             debug!(
                                 "Structured output post-processing succeeded for provider '{}'. Output length: {} chars",
                                 provider.id,
@@ -387,7 +396,9 @@ async fn post_process_transcription(
                             return PostProcessOutcome::Done(result);
                         } else {
                             error!("Structured output response missing 'transcription' field");
-                            return PostProcessOutcome::Done(strip_invisible_chars(content));
+                            let result = strip_invisible_chars(content);
+                            log_post_process_output(&provider.id, &result);
+                            return PostProcessOutcome::Done(result);
                         }
                     }
                     Err(e) => {
@@ -395,7 +406,9 @@ async fn post_process_transcription(
                             "Failed to parse structured output JSON: {}. Returning raw content.",
                             e
                         );
-                        return PostProcessOutcome::Done(strip_invisible_chars(content));
+                        let result = strip_invisible_chars(content);
+                        log_post_process_output(&provider.id, &result);
+                        return PostProcessOutcome::Done(result);
                     }
                 }
             }
@@ -428,6 +441,7 @@ async fn post_process_transcription(
     {
         Ok(Some(content)) => {
             let content = strip_invisible_chars(strip_think_block(&content));
+            log_post_process_output(&provider.id, &content);
             debug!(
                 "LLM post-processing succeeded for provider '{}'. Output length: {} chars",
                 provider.id,
