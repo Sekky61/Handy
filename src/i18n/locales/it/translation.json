@@ -468,7 +468,17 @@
       "retranscribe": "Ri-trascrivere",
       "retranscribeError": "Impossibile ri-trascrivere. Riprova.",
       "transcribing": "Trascrizione in corso...",
-      "transcriptionFailed": "Trascrizione fallita. Puoi ri-trascrivere usando l'icona di ripetizione."
+      "transcriptionFailed": "Trascrizione fallita. Puoi ri-trascrivere usando l'icona di ripetizione.",
+      "original": "Original",
+      "postProcessed": "Post-processed",
+      "stats": {
+        "transcription": "Transcription: {{value}}",
+        "postProcess": "Post-process: {{value}}",
+        "tokens": "Tokens: {{count}}",
+        "milliseconds": "{{value}} ms",
+        "seconds": "{{value}} s",
+        "separator": " · "
+      }
     },
     "debug": {
       "title": "Debug",

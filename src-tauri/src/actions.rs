@@ -3,7 +3,7 @@ use crate::apple_intelligence;
 use crate::audio_feedback::{play_feedback_sound, play_feedback_sound_blocking, SoundType};
 use crate::audio_toolkit::{is_microphone_access_denied, is_no_input_device_error, VadPolicy};
 use crate::managers::audio::AudioRecordingManager;
-use crate::managers::history::HistoryManager;
+use crate::managers::history::{HistoryEntryStats, HistoryManager};
 use crate::managers::model::ModelManager;
 use crate::managers::transcription::StreamWorkKind;
 use crate::managers::transcription::TranscriptionManager;
@@ -127,7 +127,28 @@ fn should_use_streaming_overlay(style: OverlayStyle, is_streaming: bool) -> bool
     style == OverlayStyle::Live && is_streaming
 }
 
-async fn post_process_transcription(settings: &AppSettings, transcription: &str) -> Option<String> {
+struct PostProcessResult {
+    text: String,
+    prompt_tokens: Option<i64>,
+    completion_tokens: Option<i64>,
+    total_tokens: Option<i64>,
+}
+
+impl PostProcessResult {
+    fn with_usage(text: String, usage: Option<crate::llm_client::ChatCompletionUsage>) -> Self {
+        Self {
+            text,
+            prompt_tokens: usage.as_ref().and_then(|usage| usage.prompt_tokens),
+            completion_tokens: usage.as_ref().and_then(|usage| usage.completion_tokens),
+            total_tokens: usage.as_ref().and_then(|usage| usage.total_tokens),
+        }
+    }
+}
+
+async fn post_process_transcription(
+    settings: &AppSettings,
+    transcription: &str,
+) -> Option<PostProcessResult> {
     if is_blank_transcription(transcription) {
         debug!("Post-processing skipped because the transcription is empty");
         return None;
@@ -233,7 +254,7 @@ async fn post_process_transcription(settings: &AppSettings, transcription: &str)
                                 "Apple Intelligence post-processing succeeded. Output length: {} chars",
                                 result.len()
                             );
-                            Some(result)
+                            Some(PostProcessResult::with_usage(result, None))
                         }
                     }
                     Err(err) => {
@@ -263,7 +284,7 @@ async fn post_process_transcription(settings: &AppSettings, transcription: &str)
             "additionalProperties": false
         });
 
-        match crate::llm_client::send_chat_completion_with_schema(
+        match crate::llm_client::send_chat_completion_with_schema_and_usage(
             &provider,
             api_key.clone(),
             &model,
@@ -274,7 +295,13 @@ async fn post_process_transcription(settings: &AppSettings, transcription: &str)
         )
         .await
         {
-            Ok(Some(content)) => {
+            Ok(result) => {
+                let Some(content) = result.content else {
+                    error!("LLM API response has no content");
+                    return None;
+                };
+
+                let usage = result.usage;
                 // Parse the JSON response to extract the transcription field
                 let content = strip_think_block(&content);
                 match serde_json::from_str::<serde_json::Value>(content) {
@@ -289,12 +316,12 @@ async fn post_process_transcription(settings: &AppSettings, transcription: &str)
                                 provider.id,
                                 result.len()
                             );
-                            return Some(result);
+                            return Some(PostProcessResult::with_usage(result, usage));
                         } else {
                             error!("Structured output response missing 'transcription' field");
                             let result = strip_invisible_chars(&content);
                             log_post_process_output(&provider.id, &result);
-                            return Some(result);
+                            return Some(PostProcessResult::with_usage(result, usage));
                         }
                     }
                     Err(e) => {
@@ -304,13 +331,9 @@ async fn post_process_transcription(settings: &AppSettings, transcription: &str)
                         );
                         let result = strip_invisible_chars(&content);
                         log_post_process_output(&provider.id, &result);
-                        return Some(result);
+                        return Some(PostProcessResult::with_usage(result, usage));
                     }
                 }
-            }
-            Ok(None) => {
-                error!("LLM API response has no content");
-                return None;
             }
             Err(e) => {
                 warn!(
@@ -326,7 +349,7 @@ async fn post_process_transcription(settings: &AppSettings, transcription: &str)
     let processed_prompt = prompt.replace("${output}", transcription);
     debug!("Processed prompt length: {} chars", processed_prompt.len());
 
-    match crate::llm_client::send_chat_completion(
+    match crate::llm_client::send_chat_completion_with_usage(
         &provider,
         api_key,
         &model,
@@ -335,7 +358,12 @@ async fn post_process_transcription(settings: &AppSettings, transcription: &str)
     )
     .await
     {
-        Ok(Some(content)) => {
+        Ok(result) => {
+            let Some(content) = result.content else {
+                error!("LLM API response has no content");
+                return None;
+            };
+
             let content = strip_invisible_chars(strip_think_block(&content));
             log_post_process_output(&provider.id, &content);
             debug!(
@@ -343,11 +371,7 @@ async fn post_process_transcription(settings: &AppSettings, transcription: &str)
                 provider.id,
                 content.len()
             );
-            Some(content)
-        }
-        Ok(None) => {
-            error!("LLM API response has no content");
-            None
+            Some(PostProcessResult::with_usage(content, result.usage))
         }
         Err(e) => {
             error!(
@@ -412,6 +436,10 @@ pub(crate) struct ProcessedTranscription {
     pub final_text: String,
     pub post_processed_text: Option<String>,
     pub post_process_prompt: Option<String>,
+    pub post_process_duration_ms: Option<i64>,
+    pub post_process_prompt_tokens: Option<i64>,
+    pub post_process_completion_tokens: Option<i64>,
+    pub post_process_total_tokens: Option<i64>,
 }
 
 /// Resolve the persisted language *intent* into the language the currently-loaded
@@ -444,6 +472,10 @@ pub(crate) async fn process_transcription_output(
     let mut final_text = transcription.to_string();
     let mut post_processed_text: Option<String> = None;
     let mut post_process_prompt: Option<String> = None;
+    let mut post_process_duration_ms: Option<i64> = None;
+    let mut post_process_prompt_tokens: Option<i64> = None;
+    let mut post_process_completion_tokens: Option<i64> = None;
+    let mut post_process_total_tokens: Option<i64> = None;
 
     // Resolve the language the transcription actually ran in (the persisted
     // intent coerced against the loaded model's capabilities) so OpenCC keys off
@@ -456,9 +488,14 @@ pub(crate) async fn process_transcription_output(
     }
 
     if post_process {
-        if let Some(processed_text) = post_process_transcription(&settings, &final_text).await {
-            post_processed_text = Some(processed_text.clone());
-            final_text = processed_text;
+        let post_process_time = Instant::now();
+        if let Some(processed) = post_process_transcription(&settings, &final_text).await {
+            post_process_duration_ms = Some(post_process_time.elapsed().as_millis() as i64);
+            post_process_prompt_tokens = processed.prompt_tokens;
+            post_process_completion_tokens = processed.completion_tokens;
+            post_process_total_tokens = processed.total_tokens;
+            post_processed_text = Some(processed.text.clone());
+            final_text = processed.text;
 
             if let Some(prompt_id) = &settings.post_process_selected_prompt_id {
                 if let Some(prompt) = settings
@@ -469,6 +506,8 @@ pub(crate) async fn process_transcription_output(
                     post_process_prompt = Some(prompt.prompt.clone());
                 }
             }
+        } else {
+            post_process_duration_ms = Some(post_process_time.elapsed().as_millis() as i64);
         }
     } else if final_text != transcription {
         post_processed_text = Some(final_text.clone());
@@ -478,6 +517,10 @@ pub(crate) async fn process_transcription_output(
         final_text,
         post_processed_text,
         post_process_prompt,
+        post_process_duration_ms,
+        post_process_prompt_tokens,
+        post_process_completion_tokens,
+        post_process_total_tokens,
     }
 }
 
@@ -762,11 +805,7 @@ impl ShortcutAction for TranscribeAction {
                                 let language = Some(settings.selected_language.clone());
 
                                 crate::stt_client::transcribe_openrouter(
-                                    &provider,
-                                    api_key,
-                                    &model,
-                                    &samples,
-                                    language,
+                                    &provider, api_key, &model, &samples, language,
                                 )
                                 .await
                             }
@@ -785,6 +824,7 @@ impl ShortcutAction for TranscribeAction {
                             Err(err) => Err(err.to_string()),
                         }
                     };
+                    let transcription_duration_ms = transcription_time.elapsed().as_millis() as i64;
 
                     // Await WAV save and verify
                     let wav_saved = match wav_handle.await {
@@ -820,8 +860,8 @@ impl ShortcutAction for TranscribeAction {
                     match transcription_result {
                         Ok(transcription) => {
                             debug!(
-                                "Transcription completed in {:?}: '{}'",
-                                transcription_time.elapsed(),
+                                "Transcription completed in {}ms: '{}'",
+                                transcription_duration_ms,
                                 utils::redact_text(&transcription)
                             );
 
@@ -859,6 +899,17 @@ impl ShortcutAction for TranscribeAction {
                                     post_process,
                                     processed.post_processed_text.clone(),
                                     processed.post_process_prompt.clone(),
+                                    HistoryEntryStats {
+                                        transcription_duration_ms: Some(transcription_duration_ms),
+                                        post_process_duration_ms: processed
+                                            .post_process_duration_ms,
+                                        post_process_prompt_tokens: processed
+                                            .post_process_prompt_tokens,
+                                        post_process_completion_tokens: processed
+                                            .post_process_completion_tokens,
+                                        post_process_total_tokens: processed
+                                            .post_process_total_tokens,
+                                    },
                                 ) {
                                     error!("Failed to save history entry: {}", err);
                                 }
@@ -922,6 +973,10 @@ impl ShortcutAction for TranscribeAction {
                                     post_process,
                                     None,
                                     None,
+                                    HistoryEntryStats {
+                                        transcription_duration_ms: Some(transcription_duration_ms),
+                                        ..Default::default()
+                                    },
                                 ) {
                                     error!("Failed to save failed history entry: {}", save_err);
                                 }

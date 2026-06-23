@@ -468,7 +468,17 @@
       "retranscribe": "Перетранскрибувати",
       "retranscribeError": "Не вдалося перетранскрибувати. Будь ласка, спробуйте ще раз.",
       "transcribing": "Транскрибування...",
-      "transcriptionFailed": "Транскрипція не вдалася. Ви можете перетранскрибувати за допомогою іконки повтору."
+      "transcriptionFailed": "Транскрипція не вдалася. Ви можете перетранскрибувати за допомогою іконки повтору.",
+      "original": "Original",
+      "postProcessed": "Post-processed",
+      "stats": {
+        "transcription": "Transcription: {{value}}",
+        "postProcess": "Post-process: {{value}}",
+        "tokens": "Tokens: {{count}}",
+        "milliseconds": "{{value}} ms",
+        "seconds": "{{value}} s",
+        "separator": " · "
+      }
     },
     "debug": {
       "title": "Дебаг",

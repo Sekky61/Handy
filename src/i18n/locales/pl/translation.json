@@ -468,7 +468,17 @@
       "retranscribe": "Transkrybuj ponownie",
       "retranscribeError": "Nie udało się ponownie transkrybować. Spróbuj ponownie.",
       "transcribing": "Transkrybuję...",
-      "transcriptionFailed": "Transkrypcja nie powiodła się. Możesz transkrybować ponownie za pomocą ikony ponowienia."
+      "transcriptionFailed": "Transkrypcja nie powiodła się. Możesz transkrybować ponownie za pomocą ikony ponowienia.",
+      "original": "Original",
+      "postProcessed": "Post-processed",
+      "stats": {
+        "transcription": "Transcription: {{value}}",
+        "postProcess": "Post-process: {{value}}",
+        "tokens": "Tokens: {{count}}",
+        "milliseconds": "{{value}} ms",
+        "seconds": "{{value}} s",
+        "separator": " · "
+      }
     },
     "debug": {
       "title": "Debugowanie",

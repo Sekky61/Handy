@@ -682,6 +682,11 @@ mod tests {
             post_processed_text: post_processed.map(|text| text.to_string()),
             post_process_prompt: None,
             post_process_requested: false,
+            transcription_duration_ms: None,
+            post_process_duration_ms: None,
+            post_process_prompt_tokens: None,
+            post_process_completion_tokens: None,
+            post_process_total_tokens: None,
         }
     }
 

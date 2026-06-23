@@ -1,9 +1,10 @@
 use crate::actions::process_transcription_output;
 use crate::managers::{
-    history::{HistoryManager, PaginatedHistory},
+    history::{HistoryEntryStats, HistoryManager, PaginatedHistory},
     transcription::TranscriptionManager,
 };
 use std::sync::Arc;
+use std::time::Instant;
 use tauri::{AppHandle, State};
 
 #[tauri::command]
@@ -84,10 +85,12 @@ pub async fn retry_history_entry_transcription(
     transcription_manager.initiate_model_load();
 
     let tm = Arc::clone(&transcription_manager);
+    let transcription_time = Instant::now();
     let transcription = tauri::async_runtime::spawn_blocking(move || tm.transcribe(samples))
         .await
         .map_err(|e| format!("Transcription task panicked: {}", e))?
         .map_err(|e| e.to_string())?;
+    let transcription_duration_ms = transcription_time.elapsed().as_millis() as i64;
 
     if transcription.is_empty() {
         return Err("Recording contains no speech".to_string());
@@ -101,6 +104,13 @@ pub async fn retry_history_entry_transcription(
             transcription,
             processed.post_processed_text,
             processed.post_process_prompt,
+            HistoryEntryStats {
+                transcription_duration_ms: Some(transcription_duration_ms),
+                post_process_duration_ms: processed.post_process_duration_ms,
+                post_process_prompt_tokens: processed.post_process_prompt_tokens,
+                post_process_completion_tokens: processed.post_process_completion_tokens,
+                post_process_total_tokens: processed.post_process_total_tokens,
+            },
         )
         .map(|_| ())
         .map_err(|e| e.to_string())

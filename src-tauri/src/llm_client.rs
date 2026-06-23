@@ -123,6 +123,20 @@ struct ChatCompletionRequest {
 #[derive(Debug, Deserialize)]
 struct ChatCompletionResponse {
     choices: Vec<ChatChoice>,
+    usage: Option<ChatCompletionUsage>,
+}
+
+#[derive(Clone, Debug, Deserialize)]
+pub struct ChatCompletionUsage {
+    pub prompt_tokens: Option<i64>,
+    pub completion_tokens: Option<i64>,
+    pub total_tokens: Option<i64>,
+}
+
+#[derive(Clone, Debug)]
+pub struct ChatCompletionResult {
+    pub content: Option<String>,
+    pub usage: Option<ChatCompletionUsage>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -297,6 +311,7 @@ fn report_reqwest_error(context: &str, error: &reqwest::Error) -> String {
 /// Send a chat completion request to an OpenAI-compatible API
 /// Returns Ok(Some(content)) on success, Ok(None) if response has no content,
 /// or Err on actual errors (HTTP, parsing, etc.)
+#[allow(dead_code)]
 pub async fn send_chat_completion(
     provider: &PostProcessProvider,
     api_key: String,
@@ -304,7 +319,27 @@ pub async fn send_chat_completion(
     prompt: String,
     disable_reasoning: bool,
 ) -> Result<Option<String>, String> {
-    send_chat_completion_with_schema(
+    Ok(send_chat_completion_with_schema_and_usage(
+        provider,
+        api_key,
+        model,
+        prompt,
+        None,
+        None,
+        disable_reasoning,
+    )
+    .await?
+    .content)
+}
+
+pub async fn send_chat_completion_with_usage(
+    provider: &PostProcessProvider,
+    api_key: String,
+    model: &str,
+    prompt: String,
+    disable_reasoning: bool,
+) -> Result<ChatCompletionResult, String> {
+    send_chat_completion_with_schema_and_usage(
         provider,
         api_key,
         model,
@@ -326,6 +361,8 @@ pub async fn send_chat_completion(
 /// upstreams reject with 400), so a 400/422 answer to such a request triggers
 /// one retry without the fields, and the rejection is remembered per
 /// (base_url, model) so later requests skip the failing attempt entirely.
+#[allow(dead_code)]
+#[allow(clippy::too_many_arguments)]
 pub async fn send_chat_completion_with_schema(
     provider: &PostProcessProvider,
     api_key: String,
@@ -335,6 +372,28 @@ pub async fn send_chat_completion_with_schema(
     json_schema: Option<Value>,
     disable_reasoning: bool,
 ) -> Result<Option<String>, String> {
+    Ok(send_chat_completion_with_schema_and_usage(
+        provider,
+        api_key,
+        model,
+        user_content,
+        system_prompt,
+        json_schema,
+        disable_reasoning,
+    )
+    .await?
+    .content)
+}
+
+pub async fn send_chat_completion_with_schema_and_usage(
+    provider: &PostProcessProvider,
+    api_key: String,
+    model: &str,
+    user_content: String,
+    system_prompt: Option<String>,
+    json_schema: Option<Value>,
+    disable_reasoning: bool,
+) -> Result<ChatCompletionResult, String> {
     let base_url = provider.base_url.trim_end_matches('/');
     let url = format!("{}/chat/completions", base_url);
 
@@ -455,10 +514,13 @@ pub async fn send_chat_completion_with_schema(
         .await
         .map_err(|e| report_reqwest_error("Failed to parse API response", &e))?;
 
-    Ok(completion
-        .choices
-        .first()
-        .and_then(|choice| choice.message.content.clone()))
+    Ok(ChatCompletionResult {
+        content: completion
+            .choices
+            .first()
+            .and_then(|choice| choice.message.content.clone()),
+        usage: completion.usage,
+    })
 }
 
 /// Fetch available models from an OpenAI-compatible API

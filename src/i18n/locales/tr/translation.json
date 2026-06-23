@@ -468,7 +468,17 @@
       "retranscribe": "Yeniden transkribe et",
       "retranscribeError": "Yeniden transkripsiyon başarısız oldu. Lütfen tekrar deneyin.",
       "transcribing": "Transkribe ediliyor...",
-      "transcriptionFailed": "Transkripsiyon başarısız oldu. Yeniden deneme simgesini kullanarak tekrar transkribe edebilirsiniz."
+      "transcriptionFailed": "Transkripsiyon başarısız oldu. Yeniden deneme simgesini kullanarak tekrar transkribe edebilirsiniz.",
+      "original": "Original",
+      "postProcessed": "Post-processed",
+      "stats": {
+        "transcription": "Transcription: {{value}}",
+        "postProcess": "Post-process: {{value}}",
+        "tokens": "Tokens: {{count}}",
+        "milliseconds": "{{value}} ms",
+        "seconds": "{{value}} s",
+        "separator": " · "
+      }
     },
     "debug": {
       "title": "Hata Ayıklama",

@@ -468,7 +468,17 @@
       "retranscribe": "Přepsat znovu",
       "retranscribeError": "Opětovný přepis se nezdařil. Zkuste to prosím znovu.",
       "transcribing": "Přepisuji...",
-      "transcriptionFailed": "Přepis selhal. Můžete zkusit přepis znovu pomocí ikony opakování."
+      "transcriptionFailed": "Přepis selhal. Můžete zkusit přepis znovu pomocí ikony opakování.",
+      "original": "Original",
+      "postProcessed": "Post-processed",
+      "stats": {
+        "transcription": "Transcription: {{value}}",
+        "postProcess": "Post-process: {{value}}",
+        "tokens": "Tokens: {{count}}",
+        "milliseconds": "{{value}} ms",
+        "seconds": "{{value}} s",
+        "separator": " · "
+      }
     },
     "debug": {
       "title": "Ladění",

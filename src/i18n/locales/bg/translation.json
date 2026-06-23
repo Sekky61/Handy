@@ -468,7 +468,17 @@
       "retranscribe": "Повторна транскрипция",
       "retranscribeError": "Повторната транскрипция не бе успешна. Опитайте отново.",
       "transcribing": "Транскрибиране...",
-      "transcriptionFailed": "Транскрипцията не бе успешна. Можете да опитате отново с иконата за повторен опит."
+      "transcriptionFailed": "Транскрипцията не бе успешна. Можете да опитате отново с иконата за повторен опит.",
+      "original": "Original",
+      "postProcessed": "Post-processed",
+      "stats": {
+        "transcription": "Transcription: {{value}}",
+        "postProcess": "Post-process: {{value}}",
+        "tokens": "Tokens: {{count}}",
+        "milliseconds": "{{value}} ms",
+        "seconds": "{{value}} s",
+        "separator": " · "
+      }
     },
     "debug": {
       "title": "Отстраняване",

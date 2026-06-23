@@ -445,7 +445,17 @@
       "retranscribe": "إعادة النسخ",
       "retranscribeError": "فشلت إعادة النسخ. يرجى المحاولة مرة أخرى.",
       "transcribing": "جارٍ النسخ...",
-      "transcriptionFailed": "فشل النسخ. يمكنك إعادة النسخ باستخدام أيقونة إعادة المحاولة."
+      "transcriptionFailed": "فشل النسخ. يمكنك إعادة النسخ باستخدام أيقونة إعادة المحاولة.",
+      "original": "Original",
+      "postProcessed": "Post-processed",
+      "stats": {
+        "transcription": "Transcription: {{value}}",
+        "postProcess": "Post-process: {{value}}",
+        "tokens": "Tokens: {{count}}",
+        "milliseconds": "{{value}} ms",
+        "seconds": "{{value}} s",
+        "separator": " · "
+      }
     },
     "debug": {
       "title": "تصحيح الأخطاء",

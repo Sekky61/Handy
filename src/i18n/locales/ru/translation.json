@@ -468,7 +468,17 @@
       "retranscribe": "Перетранскрибировать",
       "retranscribeError": "Не удалось перетранскрибировать. Пожалуйста, попробуйте снова.",
       "transcribing": "Транскрибирование...",
-      "transcriptionFailed": "Транскрипция не удалась. Вы можете перетранскрибировать, используя значок повтора."
+      "transcriptionFailed": "Транскрипция не удалась. Вы можете перетранскрибировать, используя значок повтора.",
+      "original": "Original",
+      "postProcessed": "Post-processed",
+      "stats": {
+        "transcription": "Transcription: {{value}}",
+        "postProcess": "Post-process: {{value}}",
+        "tokens": "Tokens: {{count}}",
+        "milliseconds": "{{value}} ms",
+        "seconds": "{{value}} s",
+        "separator": " · "
+      }
     },
     "debug": {
       "title": "Отлаживать",

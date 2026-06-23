@@ -468,7 +468,17 @@
       "retranscribe": "再文字起こし",
       "retranscribeError": "再文字起こしに失敗しました。もう一度お試しください。",
       "transcribing": "文字起こし中…",
-      "transcriptionFailed": "文字起こしに失敗しました。リトライアイコンを使用して再文字起こしできます。"
+      "transcriptionFailed": "文字起こしに失敗しました。リトライアイコンを使用して再文字起こしできます。",
+      "original": "Original",
+      "postProcessed": "Post-processed",
+      "stats": {
+        "transcription": "Transcription: {{value}}",
+        "postProcess": "Post-process: {{value}}",
+        "tokens": "Tokens: {{count}}",
+        "milliseconds": "{{value}} ms",
+        "seconds": "{{value}} s",
+        "separator": " · "
+      }
     },
     "debug": {
       "title": "デバッグ",

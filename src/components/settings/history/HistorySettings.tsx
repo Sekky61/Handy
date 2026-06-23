@@ -258,7 +258,11 @@ export const HistorySettings: React.FC = () => {
                 key={entry.id}
                 entry={entry}
                 onToggleSaved={() => toggleSaved(entry.id)}
-                onCopyText={() => copyToClipboard(entry.transcription_text)}
+                onCopyText={() =>
+                  copyToClipboard(
+                    entry.post_processed_text || entry.transcription_text,
+                  )
+                }
                 getAudioUrl={getAudioUrl}
                 deleteAudio={deleteAudioEntry}
                 retryTranscription={retryHistoryEntry}
@@ -316,6 +320,15 @@ const HistoryEntryComponent: React.FC<HistoryEntryProps> = ({
   const [retrying, setRetrying] = useState(false);
 
   const hasTranscription = entry.transcription_text.trim().length > 0;
+  const hasPostProcessedText =
+    entry.post_processed_text !== null &&
+    entry.post_processed_text.trim().length > 0;
+  const tokenCount =
+    entry.post_process_total_tokens ??
+    (entry.post_process_prompt_tokens !== null &&
+    entry.post_process_completion_tokens !== null
+      ? entry.post_process_prompt_tokens + entry.post_process_completion_tokens
+      : null);
 
   const handleLoadAudio = useCallback(
     () => getAudioUrl(entry.file_name),
@@ -354,6 +367,30 @@ const HistoryEntryComponent: React.FC<HistoryEntryProps> = ({
   };
 
   const formattedDate = formatDateTime(String(entry.timestamp), i18n.language);
+  const formatDuration = (milliseconds: number) => {
+    if (milliseconds >= 1000) {
+      return t("settings.history.stats.seconds", {
+        value: (milliseconds / 1000).toFixed(1),
+      });
+    }
+
+    return t("settings.history.stats.milliseconds", { value: milliseconds });
+  };
+  const stats = [
+    entry.transcription_duration_ms !== null
+      ? t("settings.history.stats.transcription", {
+          value: formatDuration(entry.transcription_duration_ms),
+        })
+      : null,
+    entry.post_process_duration_ms !== null
+      ? t("settings.history.stats.postProcess", {
+          value: formatDuration(entry.post_process_duration_ms),
+        })
+      : null,
+    tokenCount !== null
+      ? t("settings.history.stats.tokens", { count: tokenCount })
+      : null,
+  ].filter((value): value is string => value !== null);
 
   return (
     <div className="px-4 py-2 pb-5 flex flex-col gap-3">
@@ -412,12 +449,12 @@ const HistoryEntryComponent: React.FC<HistoryEntryProps> = ({
         </div>
       </div>
 
-      <p
-        className={`italic text-sm pb-2 ${
+      <div
+        className={`pb-2 ${
           retrying
             ? ""
             : hasTranscription
-              ? "text-text/90 select-text cursor-text whitespace-pre-wrap break-words"
+              ? "select-text cursor-text"
               : "text-text/40"
         }`}
         style={
@@ -434,12 +471,44 @@ const HistoryEntryComponent: React.FC<HistoryEntryProps> = ({
             }
           `}</style>
         )}
-        {retrying
-          ? t("settings.history.transcribing")
-          : hasTranscription
-            ? entry.transcription_text
-            : t("settings.history.transcriptionFailed")}
-      </p>
+        {retrying ? (
+          <p className="italic text-sm">{t("settings.history.transcribing")}</p>
+        ) : hasTranscription ? (
+          <div className="space-y-2">
+            <div>
+              {hasPostProcessedText && (
+                <p className="text-[11px] font-medium uppercase text-text/40">
+                  {t("settings.history.original")}
+                </p>
+              )}
+              <p className="italic text-sm text-text/90 whitespace-pre-wrap break-words">
+                {entry.transcription_text}
+              </p>
+            </div>
+
+            {hasPostProcessedText && (
+              <div>
+                <p className="text-[11px] font-medium uppercase text-text/40">
+                  {t("settings.history.postProcessed")}
+                </p>
+                <p className="italic text-sm text-text/90 whitespace-pre-wrap break-words">
+                  {entry.post_processed_text}
+                </p>
+              </div>
+            )}
+
+            {stats.length > 0 && (
+              <p className="text-xs text-text/45">
+                {stats.join(t("settings.history.stats.separator"))}
+              </p>
+            )}
+          </div>
+        ) : (
+          <p className="italic text-sm">
+            {t("settings.history.transcriptionFailed")}
+          </p>
+        )}
+      </div>
 
       <AudioPlayer onLoadRequest={handleLoadAudio} className="w-full" />
     </div>

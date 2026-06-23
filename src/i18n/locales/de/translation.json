@@ -468,7 +468,17 @@
       "retranscribe": "Erneut transkribieren",
       "retranscribeError": "Erneute Transkription fehlgeschlagen. Bitte versuche es erneut.",
       "transcribing": "Transkribiere...",
-      "transcriptionFailed": "Transkription fehlgeschlagen. Du kannst über das Wiederholen-Symbol erneut transkribieren."
+      "transcriptionFailed": "Transkription fehlgeschlagen. Du kannst über das Wiederholen-Symbol erneut transkribieren.",
+      "original": "Original",
+      "postProcessed": "Post-processed",
+      "stats": {
+        "transcription": "Transcription: {{value}}",
+        "postProcess": "Post-process: {{value}}",
+        "tokens": "Tokens: {{count}}",
+        "milliseconds": "{{value}} ms",
+        "seconds": "{{value}} s",
+        "separator": " · "
+      }
     },
     "debug": {
       "title": "Debug",
