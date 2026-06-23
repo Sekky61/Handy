@@ -33,7 +33,8 @@
       "retry": "Tekrar dene",
       "chooseAnother": "Farklı bir model seçin",
       "download": "Modelleri indir ({{size}})",
-      "continue": "Devam et"
+      "continue": "Devam et",
+      "timeRemaining": "{{time}} kaldı"
     },
     "models": {
       "small": {
@@ -63,11 +64,15 @@
     "permissions": {
       "microphone": {
         "name": "Mikrofon",
-        "why": "Handy sizi duyabilsin diye. Ses bu bilgisayarda metne dönüştürülür, hiçbir yere yüklenmez."
+        "why": "Handy sizi duyabilsin diye. Ses bu bilgisayarda metne dönüştürülür, hiçbir yere yüklenmez.",
+        "title": "Mikrofon Erişimi",
+        "description": "Sesinizi transkripsiyon için alabilmek için gereklidir."
       },
       "accessibility": {
         "name": "Erişilebilirlik",
-        "why": "Kısayolunuz her uygulamada çalışsın ve Handy metni imlecinizin bulunduğu yere yazabilsin diye."
+        "why": "Kısayolunuz her uygulamada çalışsın ve Handy metni imlecinizin bulunduğu yere yazabilsin diye.",
+        "title": "Erişilebilirlik Erişimi",
+        "description": "Transkribe edilen metni uygulamalarınıza yazabilmek için gereklidir."
       },
       "errors": {
         "checkFailed": "İzinler kontrol edilemedi. Lütfen tekrar deneyin.",
@@ -86,7 +91,12 @@
       "hintBoth": "Devam etmek için ikisine de izin verin",
       "hintMicrophone": "Devam etmek için mikrofona izin verin",
       "welcomeBack": "Tekrar hoş geldiniz. Kaldığınız yerden devam ediyoruz.",
-      "relaunch": "Bundan sonra kısayol yanıt vermiyor mu? <relaunch>Handy'yi yeniden başlatın</relaunch>, doğrudan buraya döneceksiniz."
+      "relaunch": "Bundan sonra kısayol yanıt vermiyor mu? <relaunch>Handy'yi yeniden başlatın</relaunch>, doğrudan buraya döneceksiniz.",
+      "title": "İzinler Gerekli",
+      "description": "Handy'nin düzgün çalışabilmesi için birkaç izne ihtiyacı var.",
+      "grant": "İzin Ver",
+      "granted": "Verildi",
+      "allGranted": "Her şey hazır!"
     },
     "shell": {
       "back": "Geri",
@@ -218,6 +228,16 @@
     "linux": {
       "tryIt": "Çalışmıyor mu? <guide>Linux kurulum rehberi</guide>",
       "done": "Diğer uygulamalarda çalışmıyor mu? <guide>Linux kurulum rehberi</guide>"
+    },
+    "subtitle": "Başlamak için bir transkripsiyon modeli seçin",
+    "existingModelsTitle": "Uyumlu Modeller",
+    "downloadModelsTitle": "İndirilebilir",
+    "showAllModels": "{{total}} modelin tümünü göster",
+    "showFewerModels": "Daha az model göster",
+    "recommended": "Önerilen",
+    "modelCard": {
+      "accuracy": "doğruluk",
+      "speed": "hız"
     }
   },
   "modelTable": {
@@ -322,7 +342,21 @@
     "modelUnloaded": "Model Boşaltıldı",
     "noModelDownloadRequired": "Model Yok – İndirme Gerekli",
     "downloadSpeed": "{{speed}} MB/s",
-    "lockedWhileTranscribing": "Geçmiş'teki yazıya dökme bitince modeli değiştirebilirsiniz."
+    "lockedWhileTranscribing": "Geçmiş'teki yazıya dökme bitince modeli değiştirebilirsiniz.",
+    "deleteModel": "{{modelName}} Sil",
+    "switching": "Değiştiriliyor...",
+    "capabilities": {
+      "languageSelection": "Birden fazla giriş dilini destekler",
+      "languageCount": "{{total}} dil",
+      "translation": "İngilizce'ye çevirebilir",
+      "translate": "İngilizce'ye çevir",
+      "singleLanguage": "Yalnızca bu dili destekler",
+      "languageOnly": "Yalnızca {{language}}",
+      "streaming": "Konuşurken canlı transkripsiyon gösterir"
+    },
+    "cancel": "İptal",
+    "cancelDownload": "İndirmeyi iptal et",
+    "legacy": "Eski"
   },
   "settings": {
     "modelSettings": {
@@ -352,7 +386,9 @@
           }
         },
         "errors": {
-          "set": "Kısayol ayarlanamadı: {{error}}"
+          "set": "Kısayol ayarlanamadı: {{error}}",
+          "restore": "Orijinal kısayol geri yüklenemedi",
+          "reset": "Kısayol orijinal değerine sıfırlanamadı"
         }
       },
       "language": {
@@ -427,12 +463,26 @@
         "title": "Eski modeller artık Handy ile çalışmıyor",
         "description": "Bilgisayarınızda {{size}} yer kaplıyorlar.",
         "delete": "Modelleri sil",
-        "deleteFailed": "Bazı eski modeller silinemedi. Ayrıntılar için günlüğe bakın."
+        "deleteFailed": "Bazı eski modeller silinemedi. Ayrıntılar için günlüğe bakın.",
+        "deleted": "Eski modeller silindi"
       },
       "rescan": {
         "label": "Yeniden Tara",
         "tooltip": "Handy dışında modeller klasörüne veya Hugging Face önbelleğine eklenen modelleri yeniden tara"
-      }
+      },
+      "description": "Bir transkripsiyon modeli seçin veya ek modeller indirin. Farklı modeller değişen doğruluk ve hız seviyeleri sunar.",
+      "deleteConfirm": "{{modelName}} modelini silmek istediğinizden emin misiniz? Kullanmak için tekrar indirmeniz gerekecek.",
+      "deleteActiveConfirm": "{{modelName}} aktif modelinizdir. Silmek, yeni bir model seçene kadar transkripsiyonları durduracaktır. Emin misiniz?",
+      "deleteTitle": "Modeli Sil",
+      "filters": {
+        "allLanguages": "Tüm Diller",
+        "streaming": "Canlı transkripsiyonu destekleyen modelleri filtrele",
+        "translation": "İngilizce'ye çeviriyi destekleyen modelleri filtrele"
+      },
+      "noModelsMatch": "Bu filtreyle eşleşen model yok.",
+      "yourModels": "İndirilen Modeller",
+      "availableModels": "İndirilebilir",
+      "searchPlaceholder": "Modelleri ada göre ara…"
     },
     "languages": {
       "title": "Diller"
@@ -624,7 +674,8 @@
           "asTranscribed": "Transkripsiyondaki gibi",
           "simplified": "Basitleştirilmiş",
           "traditionalTw": "Geleneksel (Tayvan)",
-          "traditionalHk": "Geleneksel (Hong Kong)"
+          "traditionalHk": "Geleneksel (Hong Kong)",
+          "traditional": "Geleneksel"
         }
       }
     },
@@ -717,7 +768,18 @@
       "showMore": "Daha fazla göster",
       "showLess": "Daha az göster",
       "dropTitle": "Yazıya dökmek için bırakın",
-      "dropDescription": "Geçmiş'te görünecek."
+      "dropDescription": "Geçmiş'te görünecek.",
+      "retranscribeError": "Yeniden transkripsiyon başarısız oldu. Lütfen tekrar deneyin.",
+      "original": "Original",
+      "postProcessed": "Post-processed",
+      "stats": {
+        "transcription": "Transcription: {{value}}",
+        "postProcess": "Post-process: {{value}}",
+        "tokens": "Tokens: {{count}}",
+        "milliseconds": "{{value}} ms",
+        "seconds": "{{value}} s",
+        "separator": " · "
+      }
     },
     "debug": {
       "title": "Hata Ayıklama",
@@ -748,7 +810,9 @@
       "whatsNewPreview": {
         "title": "Yenilikleri Önizle",
         "description": "En son paketlenmiş sürüm notunu görüldü olarak işaretlemeden aç",
-        "button": "Önizle"
+        "button": "Önizle",
+        "noNotes": "Paketlenmiş sürüm notu bulunamadı",
+        "error": "Sürüm notları önizlenemedi"
       },
       "onboardingPreview": {
         "title": "İlk kurulum önizlemesi",
@@ -762,7 +826,9 @@
           "demo": "Demo",
           "try": "Deneyin",
           "done": "Hazır"
-        }
+        },
+        "permissionsButton": "İzinler",
+        "modelsButton": "Model seçimi"
       },
       "onboardingRun": {
         "title": "İlk Kurulumu Çalıştır",
@@ -865,6 +931,11 @@
         "verdictOk": "Tuş olayları Handy'ye normal şekilde ulaşıyor.",
         "verdictNoEvents": "Hiç olay yakalanmadı — test sırasında herhangi bir tuşa bastınız mı?",
         "failed": "Tanılama başarısız: {{error}}"
+      },
+      "paths": {
+        "appData": "Uygulama Verileri:",
+        "models": "Modeller:",
+        "settings": "Ayarlar:"
       }
     },
     "about": {
@@ -956,7 +1027,8 @@
     "open": "Aç",
     "copy": "Kopyala",
     "clear": "Temizle",
-    "noOptionsFound": "Seçenek bulunamadı"
+    "noOptionsFound": "Seçenek bulunamadı",
+    "back": "Geri"
   },
   "errors": {
     "loadDirectory": "Dizin yüklenirken hata oluştu: {{error}}",
@@ -986,7 +1058,9 @@
     "filePostProcessFailedTitle": "Son işlem olmadan yazıya döküldü",
     "filePostProcessFailed": "Son işlem tamamlanmadı, bu yüzden metin olduğu gibi kaydedildi.",
     "fileTranscriptionFailedTitle": "Dosya transkripsiyonu başarısız oldu",
-    "transcriptionFailedTitle": "Transkripsiyon başarısız oldu"
+    "transcriptionFailedTitle": "Transkripsiyon başarısız oldu",
+    "recordingFailed": "Kayıt başlatılamadı: {{error}}",
+    "modelLoadFailedUnknown": "bilinmeyen model"
   },
   "notices": {
     "errorOne": "{{n}} hata",
@@ -1023,5 +1097,9 @@
     "learnMore": "Bu nasıl düzeltilir",
     "recorderBlocked": "Şu anda kısayol kaydedilemiyor — macOS Secure Input tuş olaylarını engelliyor. Önce Secure Input uyarısını giderin.",
     "dismiss": "Kapat"
+  },
+  "accessibility": {
+    "permissionsDescription": "Handy, transkribe edilen metni yazabilmek için erişilebilirlik izinlerine ihtiyaç duyar.",
+    "openSettings": "Sistem Ayarlarını Aç"
   }
 }

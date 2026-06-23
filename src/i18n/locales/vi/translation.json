@@ -33,7 +33,8 @@
       "retry": "Thử lại",
       "chooseAnother": "Chọn mô hình khác",
       "download": "Tải mô hình ({{size}})",
-      "continue": "Tiếp tục"
+      "continue": "Tiếp tục",
+      "timeRemaining": "Còn {{time}}"
     },
     "models": {
       "small": {
@@ -63,11 +64,15 @@
     "permissions": {
       "microphone": {
         "name": "Micrô",
-        "why": "Để Handy nghe được bạn. Âm thanh được chuyển thành văn bản ngay trên máy tính này và không bao giờ được tải lên."
+        "why": "Để Handy nghe được bạn. Âm thanh được chuyển thành văn bản ngay trên máy tính này và không bao giờ được tải lên.",
+        "title": "Quyền truy cập Micrô",
+        "description": "Cần thiết để nghe giọng nói của bạn để chuyển đổi."
       },
       "accessibility": {
         "name": "Trợ năng",
-        "why": "Để phím tắt của bạn hoạt động trong mọi ứng dụng, và Handy có thể gõ văn bản vào nơi con trỏ của bạn đang đứng."
+        "why": "Để phím tắt của bạn hoạt động trong mọi ứng dụng, và Handy có thể gõ văn bản vào nơi con trỏ của bạn đang đứng.",
+        "title": "Quyền truy cập Trợ năng",
+        "description": "Cần thiết để nhập văn bản đã chuyển đổi vào các ứng dụng của bạn."
       },
       "errors": {
         "checkFailed": "Không thể kiểm tra quyền. Vui lòng thử lại.",
@@ -86,7 +91,12 @@
       "hintBoth": "Hãy cho phép cả hai để tiếp tục",
       "hintMicrophone": "Hãy cho phép micrô để tiếp tục",
       "welcomeBack": "Chào mừng bạn quay lại. Tiếp tục từ chỗ bạn đã dừng.",
-      "relaunch": "Phím tắt không phản hồi sau bước này? <relaunch>Khởi chạy lại Handy</relaunch> và bạn sẽ quay lại đúng chỗ này."
+      "relaunch": "Phím tắt không phản hồi sau bước này? <relaunch>Khởi chạy lại Handy</relaunch> và bạn sẽ quay lại đúng chỗ này.",
+      "title": "Cần cấp quyền",
+      "description": "Handy cần một số quyền để hoạt động bình thường.",
+      "grant": "Cấp quyền",
+      "granted": "Đã cấp",
+      "allGranted": "Hoàn tất!"
     },
     "shell": {
       "back": "Quay lại",
@@ -218,6 +228,16 @@
     "linux": {
       "tryIt": "Không hoạt động? <guide>Hướng dẫn thiết lập Linux</guide>",
       "done": "Không hoạt động trong các ứng dụng khác? <guide>Hướng dẫn thiết lập Linux</guide>"
+    },
+    "subtitle": "Để bắt đầu, hãy chọn một mô hình chuyển đổi giọng nói",
+    "existingModelsTitle": "Mô hình tương thích",
+    "downloadModelsTitle": "Có sẵn để tải xuống",
+    "showAllModels": "Hiển thị tất cả {{total}} mô hình",
+    "showFewerModels": "Hiển thị ít mô hình hơn",
+    "recommended": "Đề xuất",
+    "modelCard": {
+      "accuracy": "độ chính xác",
+      "speed": "tốc độ"
     }
   },
   "modelTable": {
@@ -322,7 +342,21 @@
     "modelUnloaded": "Mô Hình Đã Gỡ",
     "noModelDownloadRequired": "Chưa Có Mô Hình - Cần Tải Xuống",
     "downloadSpeed": "{{speed}} MB/s",
-    "lockedWhileTranscribing": "Bạn có thể đổi mô hình sau khi việc chép lời trong Lịch sử hoàn tất."
+    "lockedWhileTranscribing": "Bạn có thể đổi mô hình sau khi việc chép lời trong Lịch sử hoàn tất.",
+    "switching": "Đang chuyển...",
+    "deleteModel": "Xóa {{modelName}}",
+    "capabilities": {
+      "languageSelection": "Hỗ trợ nhiều ngôn ngữ đầu vào",
+      "languageCount": "{{total}} ngôn ngữ",
+      "translation": "Có thể dịch sang tiếng Anh",
+      "translate": "Dịch sang tiếng Anh",
+      "singleLanguage": "Chỉ hỗ trợ ngôn ngữ này",
+      "languageOnly": "Chỉ {{language}}",
+      "streaming": "Hiển thị phiên âm trực tiếp khi bạn nói"
+    },
+    "cancel": "Hủy",
+    "cancelDownload": "Hủy tải xuống",
+    "legacy": "Cũ"
   },
   "settings": {
     "modelSettings": {
@@ -352,7 +386,9 @@
           }
         },
         "errors": {
-          "set": "Không thể đặt phím tắt: {{error}}"
+          "set": "Không thể đặt phím tắt: {{error}}",
+          "restore": "Không thể khôi phục phím tắt gốc",
+          "reset": "Không thể đặt lại phím tắt về giá trị gốc"
         }
       },
       "language": {
@@ -427,12 +463,26 @@
         "title": "Các mô hình cũ không còn hoạt động với Handy",
         "description": "Chúng đang chiếm {{size}} trên máy tính của bạn.",
         "delete": "Xóa mô hình",
-        "deleteFailed": "Không thể xóa một số mô hình cũ. Hãy kiểm tra nhật ký để biết chi tiết."
+        "deleteFailed": "Không thể xóa một số mô hình cũ. Hãy kiểm tra nhật ký để biết chi tiết.",
+        "deleted": "Đã xóa các mô hình cũ"
       },
       "rescan": {
         "label": "Quét lại",
         "tooltip": "Quét lại các mô hình được thêm vào thư mục mô hình hoặc bộ nhớ đệm Hugging Face bên ngoài Handy"
-      }
+      },
+      "description": "Chọn mô hình chuyển đổi hoặc tải thêm mô hình. Các mô hình khác nhau có mức độ chính xác và tốc độ khác nhau.",
+      "deleteConfirm": "Bạn có chắc chắn muốn xóa {{modelName}}? Bạn sẽ cần tải lại để sử dụng.",
+      "deleteActiveConfirm": "{{modelName}} là mô hình đang hoạt động của bạn. Xóa nó sẽ dừng phiên âm cho đến khi bạn chọn một mô hình mới. Bạn có chắc không?",
+      "deleteTitle": "Xóa mô hình",
+      "filters": {
+        "allLanguages": "Tất cả ngôn ngữ",
+        "streaming": "Lọc các mô hình hỗ trợ phiên âm trực tiếp",
+        "translation": "Lọc các mô hình hỗ trợ dịch sang tiếng Anh"
+      },
+      "noModelsMatch": "Không có mô hình nào khớp với bộ lọc này.",
+      "yourModels": "Mô hình đã tải",
+      "availableModels": "Có sẵn để tải xuống",
+      "searchPlaceholder": "Tìm mô hình theo tên…"
     },
     "languages": {
       "title": "Ngôn ngữ"
@@ -624,7 +674,8 @@
           "asTranscribed": "Giữ nguyên bản chép",
           "simplified": "Giản thể",
           "traditionalTw": "Phồn thể (Đài Loan)",
-          "traditionalHk": "Phồn thể (Hồng Kông)"
+          "traditionalHk": "Phồn thể (Hồng Kông)",
+          "traditional": "Phồn thể"
         }
       }
     },
@@ -717,7 +768,18 @@
       "showMore": "Xem thêm",
       "showLess": "Thu gọn",
       "dropTitle": "Thả để chép lời",
-      "dropDescription": "Nó sẽ xuất hiện trong Lịch sử."
+      "dropDescription": "Nó sẽ xuất hiện trong Lịch sử.",
+      "retranscribeError": "Không thể phiên âm lại. Vui lòng thử lại.",
+      "original": "Original",
+      "postProcessed": "Post-processed",
+      "stats": {
+        "transcription": "Transcription: {{value}}",
+        "postProcess": "Post-process: {{value}}",
+        "tokens": "Tokens: {{count}}",
+        "milliseconds": "{{value}} ms",
+        "seconds": "{{value}} s",
+        "separator": " · "
+      }
     },
     "debug": {
       "title": "Gỡ lỗi",
@@ -748,7 +810,9 @@
       "whatsNewPreview": {
         "title": "Xem trước điểm mới",
         "description": "Mở ghi chú phát hành mới nhất được đóng gói mà không đánh dấu là đã xem",
-        "button": "Xem trước"
+        "button": "Xem trước",
+        "noNotes": "Không tìm thấy ghi chú phát hành được đóng gói",
+        "error": "Không thể xem trước ghi chú phát hành"
       },
       "onboardingPreview": {
         "title": "Xem trước thiết lập ban đầu",
@@ -762,7 +826,9 @@
           "demo": "Demo",
           "try": "Thử xem",
           "done": "Hoàn tất"
-        }
+        },
+        "permissionsButton": "Quyền",
+        "modelsButton": "Chọn mô hình"
       },
       "onboardingRun": {
         "title": "Chạy hướng dẫn làm quen",
@@ -865,6 +931,11 @@
         "verdictOk": "Các sự kiện phím đang đến Handy bình thường.",
         "verdictNoEvents": "Không ghi nhận sự kiện nào — bạn có bấm phím nào trong lúc kiểm tra không?",
         "failed": "Chẩn đoán thất bại: {{error}}"
+      },
+      "paths": {
+        "appData": "Dữ liệu ứng dụng:",
+        "models": "Mô hình:",
+        "settings": "Cài đặt:"
       }
     },
     "about": {
@@ -956,7 +1027,8 @@
     "open": "Mở",
     "copy": "Sao chép",
     "clear": "Xóa",
-    "noOptionsFound": "Không tìm thấy tùy chọn"
+    "noOptionsFound": "Không tìm thấy tùy chọn",
+    "back": "Quay lại"
   },
   "errors": {
     "loadDirectory": "Lỗi khi tải thư mục: {{error}}",
@@ -986,7 +1058,9 @@
     "filePostProcessFailedTitle": "Đã chép lời không qua xử lý sau",
     "filePostProcessFailed": "Xử lý sau chưa hoàn tất nên bản chép lời được lưu nguyên trạng.",
     "fileTranscriptionFailedTitle": "Phiên âm tệp thất bại",
-    "transcriptionFailedTitle": "Phiên âm thất bại"
+    "transcriptionFailedTitle": "Phiên âm thất bại",
+    "recordingFailed": "Không thể bắt đầu ghi âm: {{error}}",
+    "modelLoadFailedUnknown": "mô hình không xác định"
   },
   "notices": {
     "errorOne": "{{n}} lỗi",
@@ -1023,5 +1097,9 @@
     "learnMore": "Cách khắc phục",
     "recorderBlocked": "Hiện không thể ghi phím tắt — Secure Input của macOS đang chặn các sự kiện phím. Hãy xử lý cảnh báo Secure Input trước.",
     "dismiss": "Bỏ qua"
+  },
+  "accessibility": {
+    "permissionsDescription": "Handy cần quyền truy cập để gõ văn bản đã chuyển đổi.",
+    "openSettings": "Mở Cài đặt Hệ thống"
   }
 }

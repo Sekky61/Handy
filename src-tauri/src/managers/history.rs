@@ -33,6 +33,13 @@ static MIGRATIONS: &[M] = &[
     M::up("ALTER TABLE transcription_history ADD COLUMN post_processed_text TEXT;"),
     M::up("ALTER TABLE transcription_history ADD COLUMN post_process_prompt TEXT;"),
     M::up("ALTER TABLE transcription_history ADD COLUMN post_process_requested BOOLEAN NOT NULL DEFAULT 0;"),
+    M::up(
+        "ALTER TABLE transcription_history ADD COLUMN transcription_duration_ms INTEGER;
+         ALTER TABLE transcription_history ADD COLUMN post_process_duration_ms INTEGER;
+         ALTER TABLE transcription_history ADD COLUMN post_process_prompt_tokens INTEGER;
+         ALTER TABLE transcription_history ADD COLUMN post_process_completion_tokens INTEGER;
+         ALTER TABLE transcription_history ADD COLUMN post_process_total_tokens INTEGER;",
+    ),
 ];
 
 /// Nullable columns added outside [`MIGRATIONS`]; see
@@ -42,7 +49,8 @@ const ADDED_COLUMNS: &[&str] = &["source_name", "language", "language_source"];
 /// Every column a [`HistoryEntry`] is read from.
 const ENTRY_COLUMNS: &str = "id, file_name, timestamp, saved, title, transcription_text, \
     post_processed_text, post_process_prompt, post_process_requested, source_name, language, \
-    language_source";
+    language_source, transcription_duration_ms, post_process_duration_ms, \
+    post_process_prompt_tokens, post_process_completion_tokens, post_process_total_tokens";
 
 #[derive(Clone, Debug, Serialize, Deserialize, Type)]
 pub struct PaginatedHistory {
@@ -81,6 +89,20 @@ pub struct HistoryEntry {
     pub language: Option<String>,
     /// How that language was chosen; `None` before it was recorded.
     pub language_source: Option<LanguageSource>,
+    pub transcription_duration_ms: Option<i64>,
+    pub post_process_duration_ms: Option<i64>,
+    pub post_process_prompt_tokens: Option<i64>,
+    pub post_process_completion_tokens: Option<i64>,
+    pub post_process_total_tokens: Option<i64>,
+}
+
+#[derive(Clone, Debug, Default, Serialize, Deserialize, Type)]
+pub struct HistoryEntryStats {
+    pub transcription_duration_ms: Option<i64>,
+    pub post_process_duration_ms: Option<i64>,
+    pub post_process_prompt_tokens: Option<i64>,
+    pub post_process_completion_tokens: Option<i64>,
+    pub post_process_total_tokens: Option<i64>,
 }
 
 pub struct HistoryManager {
@@ -272,6 +294,11 @@ impl HistoryManager {
                 .get::<_, Option<String>>("language_source")?
                 .as_deref()
                 .and_then(LanguageSource::parse),
+            transcription_duration_ms: row.get("transcription_duration_ms")?,
+            post_process_duration_ms: row.get("post_process_duration_ms")?,
+            post_process_prompt_tokens: row.get("post_process_prompt_tokens")?,
+            post_process_completion_tokens: row.get("post_process_completion_tokens")?,
+            post_process_total_tokens: row.get("post_process_total_tokens")?,
         })
     }
 
@@ -289,6 +316,7 @@ impl HistoryManager {
         post_processed_text: Option<String>,
         post_process_prompt: Option<String>,
         language: Option<LanguageDecision>,
+        stats: HistoryEntryStats,
     ) -> Result<HistoryEntry> {
         let (language, language_source) = split_language(language);
         let entry = self.insert_entry(HistoryEntry {
@@ -304,6 +332,11 @@ impl HistoryManager {
             source_name: None,
             language,
             language_source,
+            transcription_duration_ms: stats.transcription_duration_ms,
+            post_process_duration_ms: stats.post_process_duration_ms,
+            post_process_prompt_tokens: stats.post_process_prompt_tokens,
+            post_process_completion_tokens: stats.post_process_completion_tokens,
+            post_process_total_tokens: stats.post_process_total_tokens,
         })?;
 
         self.cleanup_old_entries()?;
@@ -328,6 +361,11 @@ impl HistoryManager {
             source_name: Some(source_name),
             language: None,
             language_source: None,
+            transcription_duration_ms: None,
+            post_process_duration_ms: None,
+            post_process_prompt_tokens: None,
+            post_process_completion_tokens: None,
+            post_process_total_tokens: None,
         })
     }
 
@@ -348,8 +386,13 @@ impl HistoryManager {
                 post_process_requested,
                 source_name,
                 language,
-                language_source
-            ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)",
+                language_source,
+                transcription_duration_ms,
+                post_process_duration_ms,
+                post_process_prompt_tokens,
+                post_process_completion_tokens,
+                post_process_total_tokens
+            ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16)",
             params![
                 &entry.file_name,
                 entry.timestamp,
@@ -362,6 +405,11 @@ impl HistoryManager {
                 &entry.source_name,
                 &entry.language,
                 entry.language_source.map(LanguageSource::as_str),
+                entry.transcription_duration_ms,
+                entry.post_process_duration_ms,
+                entry.post_process_prompt_tokens,
+                entry.post_process_completion_tokens,
+                entry.post_process_total_tokens,
             ],
         )?;
         entry.id = conn.last_insert_rowid();
@@ -388,6 +436,7 @@ impl HistoryManager {
         post_processed_text: Option<String>,
         post_process_prompt: Option<String>,
         language: Option<LanguageDecision>,
+        stats: HistoryEntryStats,
     ) -> Result<HistoryEntry> {
         let (language, language_source) = split_language(language);
         let conn = self.get_connection()?;
@@ -397,14 +446,24 @@ impl HistoryManager {
                  post_processed_text = ?2,
                  post_process_prompt = ?3,
                  language = ?4,
-                 language_source = ?5
-             WHERE id = ?6",
+                 language_source = ?5,
+                 transcription_duration_ms = ?6,
+                 post_process_duration_ms = ?7,
+                 post_process_prompt_tokens = ?8,
+                 post_process_completion_tokens = ?9,
+                 post_process_total_tokens = ?10
+             WHERE id = ?11",
             params![
                 transcription_text,
                 post_processed_text,
                 post_process_prompt,
                 language,
                 language_source.map(LanguageSource::as_str),
+                stats.transcription_duration_ms,
+                stats.post_process_duration_ms,
+                stats.post_process_prompt_tokens,
+                stats.post_process_completion_tokens,
+                stats.post_process_total_tokens,
                 id
             ],
         )?;

@@ -33,7 +33,8 @@
       "retry": "Intentar de nuevo",
       "chooseAnother": "Elegir otro modelo",
       "download": "Descargar modelos ({{size}})",
-      "continue": "Continuar"
+      "continue": "Continuar",
+      "timeRemaining": "Quedan {{time}}"
     },
     "models": {
       "small": {
@@ -63,11 +64,15 @@
     "permissions": {
       "microphone": {
         "name": "Micrófono",
-        "why": "Para que Handy pueda escucharte. El audio se convierte en texto en este equipo y nunca se sube a ninguna parte."
+        "why": "Para que Handy pueda escucharte. El audio se convierte en texto en este equipo y nunca se sube a ninguna parte.",
+        "title": "Acceso al micrófono",
+        "description": "Necesario para escuchar tu voz para la transcripción."
       },
       "accessibility": {
         "name": "Accesibilidad",
-        "why": "Para que tu atajo funcione en cualquier app y Handy pueda escribir el texto donde está tu cursor."
+        "why": "Para que tu atajo funcione en cualquier app y Handy pueda escribir el texto donde está tu cursor.",
+        "title": "Acceso de accesibilidad",
+        "description": "Necesario para escribir el texto transcrito en tus aplicaciones."
       },
       "errors": {
         "checkFailed": "Error al verificar permisos. Por favor, inténtalo de nuevo.",
@@ -86,7 +91,12 @@
       "hintBoth": "Permite ambos para continuar",
       "hintMicrophone": "Permite el micrófono para continuar",
       "welcomeBack": "Te damos la bienvenida de nuevo. Seguimos donde lo dejaste.",
-      "relaunch": "¿El atajo no responde después de esto? <relaunch>Reinicia Handy</relaunch> y volverás justo aquí."
+      "relaunch": "¿El atajo no responde después de esto? <relaunch>Reinicia Handy</relaunch> y volverás justo aquí.",
+      "title": "Permisos requeridos",
+      "description": "Handy necesita algunos permisos para funcionar correctamente.",
+      "grant": "Conceder permiso",
+      "granted": "Concedido",
+      "allGranted": "¡Todo listo!"
     },
     "shell": {
       "back": "Atrás",
@@ -218,6 +228,16 @@
     "linux": {
       "tryIt": "¿No funciona? <guide>Guía de configuración para Linux</guide>",
       "done": "¿No funciona en otras apps? <guide>Guía de configuración para Linux</guide>"
+    },
+    "subtitle": "Para comenzar, elige un modelo de transcripción",
+    "existingModelsTitle": "Modelos compatibles",
+    "downloadModelsTitle": "Disponibles para descargar",
+    "showAllModels": "Mostrar los {{total}} modelos",
+    "showFewerModels": "Mostrar menos modelos",
+    "recommended": "Recomendado",
+    "modelCard": {
+      "accuracy": "precisión",
+      "speed": "velocidad"
     }
   },
   "modelTable": {
@@ -322,7 +342,21 @@
     "modelUnloaded": "Modelo descargado",
     "noModelDownloadRequired": "Sin modelo - descarga requerida",
     "downloadSpeed": "{{speed}} MB/s",
-    "lockedWhileTranscribing": "Podrás cambiar de modelo cuando termine la transcripción en el Historial."
+    "lockedWhileTranscribing": "Podrás cambiar de modelo cuando termine la transcripción en el Historial.",
+    "switching": "Cambiando...",
+    "deleteModel": "Eliminar {{modelName}}",
+    "capabilities": {
+      "languageSelection": "Soporta múltiples idiomas de entrada",
+      "languageCount": "{{total}} idiomas",
+      "translation": "Puede traducir al inglés",
+      "translate": "Traducir al inglés",
+      "singleLanguage": "Solo admite este idioma",
+      "languageOnly": "Solo {{language}}",
+      "streaming": "Muestra la transcripción en vivo mientras hablas"
+    },
+    "cancel": "Cancelar",
+    "cancelDownload": "Cancelar descarga",
+    "legacy": "Heredado"
   },
   "settings": {
     "modelSettings": {
@@ -352,7 +386,9 @@
           }
         },
         "errors": {
-          "set": "Error al configurar el atajo: {{error}}"
+          "set": "Error al configurar el atajo: {{error}}",
+          "restore": "Error al restaurar el atajo original",
+          "reset": "Error al restablecer el atajo al valor original"
         }
       },
       "language": {
@@ -427,12 +463,26 @@
         "title": "Los modelos antiguos ya no funcionan con Handy",
         "description": "Ocupan {{size}} en tu equipo.",
         "delete": "Eliminar modelos",
-        "deleteFailed": "No se pudieron eliminar algunos modelos antiguos. Consulta el registro para más detalles."
+        "deleteFailed": "No se pudieron eliminar algunos modelos antiguos. Consulta el registro para más detalles.",
+        "deleted": "Modelos antiguos eliminados"
       },
       "rescan": {
         "label": "Volver a escanear",
         "tooltip": "Vuelve a escanear en busca de modelos añadidos a la carpeta de modelos o a la caché de Hugging Face fuera de Handy"
-      }
+      },
+      "description": "Selecciona un modelo de transcripción o descarga modelos adicionales. Diferentes modelos ofrecen distintos niveles de precisión y velocidad.",
+      "deleteConfirm": "¿Estás seguro de que deseas eliminar {{modelName}}? Necesitarás descargarlo de nuevo para usarlo.",
+      "deleteActiveConfirm": "{{modelName}} es tu modelo activo. Eliminarlo detendrá las transcripciones hasta que selecciones un nuevo modelo. ¿Estás seguro?",
+      "deleteTitle": "Eliminar modelo",
+      "filters": {
+        "allLanguages": "Todos los idiomas",
+        "streaming": "Filtrar modelos compatibles con la transcripción en vivo",
+        "translation": "Filtrar modelos compatibles con la traducción al inglés"
+      },
+      "noModelsMatch": "Ningún modelo coincide con este filtro.",
+      "yourModels": "Modelos descargados",
+      "availableModels": "Disponibles para descargar",
+      "searchPlaceholder": "Buscar modelos por nombre…"
     },
     "languages": {
       "title": "Idiomas"
@@ -624,7 +674,8 @@
           "asTranscribed": "Tal como se transcribió",
           "simplified": "Simplificado",
           "traditionalTw": "Tradicional (Taiwán)",
-          "traditionalHk": "Tradicional (Hong Kong)"
+          "traditionalHk": "Tradicional (Hong Kong)",
+          "traditional": "Tradicional"
         }
       }
     },
@@ -717,7 +768,18 @@
       "showMore": "Mostrar más",
       "showLess": "Mostrar menos",
       "dropTitle": "Suelta para transcribir",
-      "dropDescription": "Aparecerá en el historial."
+      "dropDescription": "Aparecerá en el historial.",
+      "retranscribeError": "No se pudo re-transcribir. Por favor, inténtalo de nuevo.",
+      "original": "Original",
+      "postProcessed": "Post-processed",
+      "stats": {
+        "transcription": "Transcription: {{value}}",
+        "postProcess": "Post-process: {{value}}",
+        "tokens": "Tokens: {{count}}",
+        "milliseconds": "{{value}} ms",
+        "seconds": "{{value}} s",
+        "separator": " · "
+      }
     },
     "debug": {
       "title": "Depuración",
@@ -748,7 +810,9 @@
       "whatsNewPreview": {
         "title": "Vista previa de novedades",
         "description": "Abrir la nota de la versión incluida más reciente sin marcarla como vista",
-        "button": "Vista previa"
+        "button": "Vista previa",
+        "noNotes": "No se encontraron notas de la versión incluidas",
+        "error": "No se pudo mostrar la vista previa de las notas de la versión"
       },
       "onboardingPreview": {
         "title": "Vista previa de la configuración inicial",
@@ -762,7 +826,9 @@
           "demo": "Demostración",
           "try": "Pruébalo",
           "done": "Todo listo"
-        }
+        },
+        "permissionsButton": "Permisos",
+        "modelsButton": "Selección de modelo"
       },
       "onboardingRun": {
         "title": "Ejecutar introducción",
@@ -865,6 +931,11 @@
         "verdictOk": "Los eventos de teclado llegan a Handy con normalidad.",
         "verdictNoEvents": "No se capturó ningún evento: ¿pulsaste alguna tecla durante la prueba?",
         "failed": "El diagnóstico falló: {{error}}"
+      },
+      "paths": {
+        "appData": "Datos de la aplicación:",
+        "models": "Modelos:",
+        "settings": "Configuración:"
       }
     },
     "about": {
@@ -956,7 +1027,8 @@
     "open": "Abrir",
     "copy": "Copiar",
     "clear": "Limpiar",
-    "noOptionsFound": "No se encontraron opciones"
+    "noOptionsFound": "No se encontraron opciones",
+    "back": "Atrás"
   },
   "errors": {
     "loadDirectory": "Error al cargar el directorio: {{error}}",
@@ -986,7 +1058,9 @@
     "filePostProcessFailedTitle": "Transcrito sin post proceso",
     "filePostProcessFailed": "El post proceso no terminó, así que la transcripción se guardó tal cual.",
     "fileTranscriptionFailedTitle": "Error al transcribir el archivo",
-    "transcriptionFailedTitle": "Error de transcripción"
+    "transcriptionFailedTitle": "Error de transcripción",
+    "recordingFailed": "Error al iniciar la grabación: {{error}}",
+    "modelLoadFailedUnknown": "modelo desconocido"
   },
   "notices": {
     "errorOne": "{{n}} error",
@@ -1023,5 +1097,9 @@
     "learnMore": "Cómo solucionarlo",
     "recorderBlocked": "Ahora mismo no se pueden grabar atajos: Secure Input de macOS está bloqueando los eventos de teclado. Resuelve primero el aviso de Secure Input.",
     "dismiss": "Descartar"
+  },
+  "accessibility": {
+    "permissionsDescription": "Handy necesita permisos de accesibilidad para escribir texto transcrito.",
+    "openSettings": "Abrir Ajustes del Sistema"
   }
 }

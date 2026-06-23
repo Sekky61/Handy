@@ -1250,7 +1250,7 @@ export type ChineseScript =
 export type ClipboardHandling = "dont_modify" | "copy_to_clipboard"
 export type CustomSounds = { start: boolean; stop: boolean }
 export type GpuDeviceOption = { id: string; name: string; total_vram_mb: number }
-export type HistoryEntry = { id: number; file_name: string; timestamp: number; saved: boolean; title: string; transcription_text: string; post_processed_text: string | null; post_process_prompt: string | null; post_process_requested: boolean; 
+export type HistoryEntry = { id: number; file_name: string; timestamp: number; saved: boolean; title: string; transcription_text: string; post_processed_text: string | null; post_process_prompt: string | null; post_process_requested: boolean; transcription_duration_ms: number | null; post_process_duration_ms: number | null; post_process_prompt_tokens: number | null; post_process_completion_tokens: number | null; post_process_total_tokens: number | null;
 /**
  * The name of the file this entry was transcribed from; `None` for a
  * dictation.

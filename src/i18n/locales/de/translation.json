@@ -33,7 +33,8 @@
       "retry": "Erneut versuchen",
       "chooseAnother": "Anderes Modell wählen",
       "download": "Modelle herunterladen ({{size}})",
-      "continue": "Weiter"
+      "continue": "Weiter",
+      "timeRemaining": "Noch {{time}}"
     },
     "models": {
       "small": {
@@ -63,11 +64,15 @@
     "permissions": {
       "microphone": {
         "name": "Mikrofon",
-        "why": "Damit Handy dich hören kann. Audio wird auf diesem Computer in Text umgewandelt und nie hochgeladen."
+        "why": "Damit Handy dich hören kann. Audio wird auf diesem Computer in Text umgewandelt und nie hochgeladen.",
+        "title": "Mikrofonzugriff",
+        "description": "Erforderlich, um deine Stimme für die Transkription zu hören."
       },
       "accessibility": {
         "name": "Bedienungshilfen",
-        "why": "Damit dein Tastenkürzel in jeder App funktioniert und Handy den Text dort eintippen kann, wo dein Cursor steht."
+        "why": "Damit dein Tastenkürzel in jeder App funktioniert und Handy den Text dort eintippen kann, wo dein Cursor steht.",
+        "title": "Bedienungshilfen-Zugriff",
+        "description": "Erforderlich, um transkribierten Text in deine Anwendungen einzugeben."
       },
       "errors": {
         "checkFailed": "Berechtigungsprüfung fehlgeschlagen. Bitte erneut versuchen.",
@@ -86,7 +91,12 @@
       "hintBoth": "Erlaube beides, um fortzufahren",
       "hintMicrophone": "Erlaube das Mikrofon, um fortzufahren",
       "welcomeBack": "Willkommen zurück. Es geht dort weiter, wo du aufgehört hast.",
-      "relaunch": "Tastenkürzel reagiert danach nicht? <relaunch>Handy neu starten</relaunch> und du landest direkt wieder hier."
+      "relaunch": "Tastenkürzel reagiert danach nicht? <relaunch>Handy neu starten</relaunch> und du landest direkt wieder hier.",
+      "title": "Berechtigungen erforderlich",
+      "description": "Handy benötigt einige Berechtigungen, um richtig zu funktionieren.",
+      "grant": "Berechtigung erteilen",
+      "granted": "Erteilt",
+      "allGranted": "Alles bereit!"
     },
     "shell": {
       "back": "Zurück",
@@ -218,6 +228,16 @@
     "linux": {
       "tryIt": "Funktioniert nicht? <guide>Linux-Einrichtungsanleitung</guide>",
       "done": "Funktioniert in anderen Apps nicht? <guide>Linux-Einrichtungsanleitung</guide>"
+    },
+    "subtitle": "Wähle ein Transkriptionsmodell, um loszulegen",
+    "existingModelsTitle": "Kompatible Modelle",
+    "downloadModelsTitle": "Verfügbar zum Download",
+    "showAllModels": "Alle {{total}} Modelle anzeigen",
+    "showFewerModels": "Weniger Modelle anzeigen",
+    "recommended": "Empfohlen",
+    "modelCard": {
+      "accuracy": "Genauigkeit",
+      "speed": "Geschwindigkeit"
     }
   },
   "modelTable": {
@@ -322,7 +342,21 @@
     "modelUnloaded": "Modell entladen",
     "noModelDownloadRequired": "Kein Modell - Download erforderlich",
     "downloadSpeed": "{{speed}} MB/s",
-    "lockedWhileTranscribing": "Du kannst das Modell wechseln, sobald die Transkription im Verlauf fertig ist."
+    "lockedWhileTranscribing": "Du kannst das Modell wechseln, sobald die Transkription im Verlauf fertig ist.",
+    "switching": "Wechseln...",
+    "deleteModel": "{{modelName}} löschen",
+    "capabilities": {
+      "languageSelection": "Unterstützt mehrere Eingabesprachen",
+      "languageCount": "{{total}} Sprachen",
+      "translation": "Kann ins Englische übersetzen",
+      "translate": "Ins Englische übersetzen",
+      "singleLanguage": "Unterstützt nur diese Sprache",
+      "languageOnly": "Nur {{language}}",
+      "streaming": "Zeigt die Transkription live während des Sprechens an"
+    },
+    "cancel": "Abbrechen",
+    "cancelDownload": "Download abbrechen",
+    "legacy": "Veraltet"
   },
   "settings": {
     "modelSettings": {
@@ -352,7 +386,9 @@
           }
         },
         "errors": {
-          "set": "Tastenkürzel konnte nicht gesetzt werden: {{error}}"
+          "set": "Tastenkürzel konnte nicht gesetzt werden: {{error}}",
+          "restore": "Ursprüngliches Tastenkürzel konnte nicht wiederhergestellt werden",
+          "reset": "Tastenkürzel konnte nicht auf Originalwert zurückgesetzt werden"
         }
       },
       "language": {
@@ -427,12 +463,26 @@
         "title": "Alte Modelle funktionieren nicht mehr mit Handy",
         "description": "Sie belegen {{size}} auf deinem Computer.",
         "delete": "Modelle löschen",
-        "deleteFailed": "Einige alte Modelle konnten nicht gelöscht werden. Details findest du im Protokoll."
+        "deleteFailed": "Einige alte Modelle konnten nicht gelöscht werden. Details findest du im Protokoll.",
+        "deleted": "Alte Modelle gelöscht"
       },
       "rescan": {
         "label": "Neu scannen",
         "tooltip": "Erneut nach Modellen scannen, die außerhalb von Handy zum Modellordner oder Hugging-Face-Cache hinzugefügt wurden"
-      }
+      },
+      "description": "Wähle ein Transkriptionsmodell aus oder lade zusätzliche Modelle herunter. Verschiedene Modelle bieten unterschiedliche Genauigkeits- und Geschwindigkeitsstufen.",
+      "deleteConfirm": "Bist du sicher, dass du {{modelName}} löschen möchtest? Du musst es erneut herunterladen, um es zu verwenden.",
+      "deleteActiveConfirm": "{{modelName}} ist dein aktives Modell. Das Löschen stoppt Transkriptionen, bis du ein neues Modell auswählst. Bist du sicher?",
+      "deleteTitle": "Modell löschen",
+      "filters": {
+        "allLanguages": "Alle Sprachen",
+        "streaming": "Modelle filtern, die Live-Transkription unterstützen",
+        "translation": "Modelle filtern, die Übersetzungen ins Englische unterstützen"
+      },
+      "noModelsMatch": "Keine Modelle entsprechen diesem Filter.",
+      "yourModels": "Heruntergeladene Modelle",
+      "availableModels": "Zum Download verfügbar",
+      "searchPlaceholder": "Modelle nach Namen suchen…"
     },
     "languages": {
       "title": "Sprachen"
@@ -624,7 +674,8 @@
           "asTranscribed": "Wie transkribiert",
           "simplified": "Vereinfacht",
           "traditionalTw": "Traditionell (Taiwan)",
-          "traditionalHk": "Traditionell (Hongkong)"
+          "traditionalHk": "Traditionell (Hongkong)",
+          "traditional": "Traditionell"
         }
       }
     },
@@ -717,7 +768,18 @@
       "showMore": "Mehr anzeigen",
       "showLess": "Weniger anzeigen",
       "dropTitle": "Zum Transkribieren ablegen",
-      "dropDescription": "Es erscheint im Verlauf."
+      "dropDescription": "Es erscheint im Verlauf.",
+      "retranscribeError": "Erneute Transkription fehlgeschlagen. Bitte versuche es erneut.",
+      "original": "Original",
+      "postProcessed": "Post-processed",
+      "stats": {
+        "transcription": "Transcription: {{value}}",
+        "postProcess": "Post-process: {{value}}",
+        "tokens": "Tokens: {{count}}",
+        "milliseconds": "{{value}} ms",
+        "seconds": "{{value}} s",
+        "separator": " · "
+      }
     },
     "debug": {
       "title": "Debug",
@@ -748,7 +810,9 @@
       "whatsNewPreview": {
         "title": "Vorschau der Neuerungen",
         "description": "Die neuesten gebündelten Versionshinweise öffnen, ohne sie als gesehen zu markieren",
-        "button": "Vorschau"
+        "button": "Vorschau",
+        "noNotes": "Keine gebündelten Versionshinweise gefunden",
+        "error": "Versionshinweise konnten nicht angezeigt werden"
       },
       "onboardingPreview": {
         "title": "Ersteinrichtung ansehen",
@@ -762,7 +826,9 @@
           "demo": "Demo",
           "try": "Ausprobieren",
           "done": "Alles bereit"
-        }
+        },
+        "permissionsButton": "Berechtigungen",
+        "modelsButton": "Modellauswahl"
       },
       "onboardingRun": {
         "title": "Onboarding ausführen",
@@ -865,6 +931,11 @@
         "verdictOk": "Tastenereignisse erreichen Handy normal.",
         "verdictNoEvents": "Keine Ereignisse erfasst — hast du während des Tests Tasten gedrückt?",
         "failed": "Diagnose fehlgeschlagen: {{error}}"
+      },
+      "paths": {
+        "appData": "App-Daten:",
+        "models": "Modelle:",
+        "settings": "Einstellungen:"
       }
     },
     "about": {
@@ -956,7 +1027,8 @@
     "open": "Öffnen",
     "copy": "Kopieren",
     "clear": "Leeren",
-    "noOptionsFound": "Keine Optionen gefunden"
+    "noOptionsFound": "Keine Optionen gefunden",
+    "back": "Zurück"
   },
   "errors": {
     "loadDirectory": "Fehler beim Laden des Verzeichnisses: {{error}}",
@@ -986,7 +1058,9 @@
     "filePostProcessFailedTitle": "Ohne Nachbearbeitung transkribiert",
     "filePostProcessFailed": "Die Nachbearbeitung wurde nicht abgeschlossen, daher wurde das Transkript unverändert gespeichert.",
     "fileTranscriptionFailedTitle": "Dateitranskription fehlgeschlagen",
-    "transcriptionFailedTitle": "Transkription fehlgeschlagen"
+    "transcriptionFailedTitle": "Transkription fehlgeschlagen",
+    "recordingFailed": "Aufnahme konnte nicht gestartet werden: {{error}}",
+    "modelLoadFailedUnknown": "unbekanntes Modell"
   },
   "notices": {
     "errorOne": "{{n}} Fehler",
@@ -1023,5 +1097,9 @@
     "learnMore": "So behebst du das",
     "recorderBlocked": "Tastenkürzel können gerade nicht aufgezeichnet werden — macOS Secure Input blockiert Tastenereignisse. Behebe zuerst die Secure-Input-Warnung.",
     "dismiss": "Ausblenden"
+  },
+  "accessibility": {
+    "permissionsDescription": "Handy benötigt Bedienungshilfen-Berechtigungen, um transkribierten Text einzugeben.",
+    "openSettings": "Systemeinstellungen öffnen"
   }
 }

@@ -33,7 +33,8 @@
       "retry": "再試行",
       "chooseAnother": "別のモデルを選択",
       "download": "モデルをダウンロード ({{size}})",
-      "continue": "続行"
+      "continue": "続行",
+      "timeRemaining": "残り {{time}}"
     },
     "models": {
       "small": {
@@ -63,11 +64,15 @@
     "permissions": {
       "microphone": {
         "name": "マイク",
-        "why": "Handy があなたの声を聞くために必要です。音声はこのコンピューター上でテキストに変換され、アップロードされることはありません。"
+        "why": "Handy があなたの声を聞くために必要です。音声はこのコンピューター上でテキストに変換され、アップロードされることはありません。",
+        "title": "マイクへのアクセス",
+        "description": "文字起こしのためにあなたの声を聞くために必要です。"
       },
       "accessibility": {
         "name": "アクセシビリティ",
-        "why": "どのアプリでもショートカットが使え、Handy がカーソル位置にテキストを入力できるようにします。"
+        "why": "どのアプリでもショートカットが使え、Handy がカーソル位置にテキストを入力できるようにします。",
+        "title": "アクセシビリティへのアクセス",
+        "description": "アプリに文字起こししたテキストを入力するために必要です。"
       },
       "errors": {
         "checkFailed": "権限の確認に失敗しました。もう一度お試しください。",
@@ -86,7 +91,12 @@
       "hintBoth": "続けるには両方を許可してください",
       "hintMicrophone": "続けるにはマイクを許可してください",
       "welcomeBack": "おかえりなさい。前回の続きから始めます。",
-      "relaunch": "このあとショートカットが反応しない場合は、<relaunch>Handy を再起動</relaunch>してください。この画面にすぐ戻れます。"
+      "relaunch": "このあとショートカットが反応しない場合は、<relaunch>Handy を再起動</relaunch>してください。この画面にすぐ戻れます。",
+      "title": "権限が必要です",
+      "description": "Handy が正常に動作するにはいくつかの権限が必要です。",
+      "grant": "権限を許可",
+      "granted": "許可済み",
+      "allGranted": "準備完了!"
     },
     "shell": {
       "back": "戻る",
@@ -218,6 +228,16 @@
     "linux": {
       "tryIt": "うまくいかない場合は <guide>Linux セットアップガイド</guide>",
       "done": "ほかのアプリで動かない場合は <guide>Linux セットアップガイド</guide>"
+    },
+    "subtitle": "開始するには、文字起こしのモデルを選択してください",
+    "existingModelsTitle": "互換性のあるモデル",
+    "downloadModelsTitle": "ダウンロード可能",
+    "showAllModels": "すべての{{total}}個のモデルを表示",
+    "showFewerModels": "表示を減らす",
+    "recommended": "おすすめ",
+    "modelCard": {
+      "accuracy": "精度",
+      "speed": "速度"
     }
   },
   "modelTable": {
@@ -322,7 +342,21 @@
     "modelUnloaded": "モデルがアンロードされました",
     "noModelDownloadRequired": "モデルなし - ダウンロードが必要",
     "downloadSpeed": "{{speed}} MB/s",
-    "lockedWhileTranscribing": "履歴の文字起こしが終わるとモデルを変更できます。"
+    "lockedWhileTranscribing": "履歴の文字起こしが終わるとモデルを変更できます。",
+    "switching": "切替中…",
+    "deleteModel": "{{modelName}}を削除",
+    "capabilities": {
+      "languageSelection": "複数の入力言語をサポート",
+      "languageCount": "{{total}}言語",
+      "translation": "英語への翻訳が可能",
+      "translate": "英語に翻訳",
+      "singleLanguage": "この言語のみ対応",
+      "languageOnly": "{{language}}のみ",
+      "streaming": "話しながらリアルタイムで文字起こしを表示"
+    },
+    "cancel": "キャンセル",
+    "cancelDownload": "ダウンロードをキャンセル",
+    "legacy": "旧式"
   },
   "settings": {
     "modelSettings": {
@@ -352,7 +386,9 @@
           }
         },
         "errors": {
-          "set": "ショートカットを設定できませんでした: {{error}}"
+          "set": "ショートカットを設定できませんでした: {{error}}",
+          "restore": "元のショートカットを復元できませんでした",
+          "reset": "ショートカットを元の値にリセットできませんでした"
         }
       },
       "language": {
@@ -427,12 +463,26 @@
         "title": "古いモデルは Handy で使用できなくなりました",
         "description": "コンピューター上で {{size}} を使用しています。",
         "delete": "モデルを削除",
-        "deleteFailed": "一部の古いモデルを削除できませんでした。詳細はログを確認してください。"
+        "deleteFailed": "一部の古いモデルを削除できませんでした。詳細はログを確認してください。",
+        "deleted": "古いモデルを削除しました"
       },
       "rescan": {
         "label": "再スキャン",
         "tooltip": "Handy を使わずに models フォルダーまたは Hugging Face キャッシュに追加されたモデルを再スキャンします"
-      }
+      },
+      "description": "文字起こしのモデルを選択するか、追加のモデルをダウンロードします。異なるモデルは精度と速度のレベルが異なります。",
+      "deleteConfirm": "{{modelName}}を削除してもよろしいですか? 再度使用するにはダウンロードが必要です。",
+      "deleteActiveConfirm": "{{modelName}}は現在使用中のモデルです。削除すると、新しいモデルを選択するまで文字起こしが停止します。本当に削除しますか?",
+      "deleteTitle": "モデルを削除",
+      "filters": {
+        "allLanguages": "すべての言語",
+        "streaming": "リアルタイム文字起こしに対応するモデルを絞り込む",
+        "translation": "英語への翻訳に対応するモデルを絞り込む"
+      },
+      "noModelsMatch": "このフィルターに一致するモデルがありません。",
+      "yourModels": "ダウンロード済みモデル",
+      "availableModels": "ダウンロード可能",
+      "searchPlaceholder": "モデルを名前で検索…"
     },
     "languages": {
       "title": "言語"
@@ -624,7 +674,8 @@
           "asTranscribed": "文字起こしのまま",
           "simplified": "簡体字",
           "traditionalTw": "繁体字 (台湾)",
-          "traditionalHk": "繁体字 (香港)"
+          "traditionalHk": "繁体字 (香港)",
+          "traditional": "繁体字"
         }
       }
     },
@@ -717,7 +768,18 @@
       "showMore": "もっと見る",
       "showLess": "閉じる",
       "dropTitle": "ドロップして文字起こし",
-      "dropDescription": "履歴に表示されます。"
+      "dropDescription": "履歴に表示されます。",
+      "retranscribeError": "再文字起こしに失敗しました。もう一度お試しください。",
+      "original": "Original",
+      "postProcessed": "Post-processed",
+      "stats": {
+        "transcription": "Transcription: {{value}}",
+        "postProcess": "Post-process: {{value}}",
+        "tokens": "Tokens: {{count}}",
+        "milliseconds": "{{value}} ms",
+        "seconds": "{{value}} s",
+        "separator": " · "
+      }
     },
     "debug": {
       "title": "デバッグ",
@@ -748,7 +810,9 @@
       "whatsNewPreview": {
         "title": "新機能をプレビュー",
         "description": "最新の同梱リリースノートを既読にせずに開く",
-        "button": "プレビュー"
+        "button": "プレビュー",
+        "noNotes": "同梱リリースノートが見つかりません",
+        "error": "リリースノートのプレビューに失敗しました"
       },
       "onboardingPreview": {
         "title": "オンボーディングをプレビュー",
@@ -762,7 +826,9 @@
           "demo": "デモ",
           "try": "お試し",
           "done": "準備完了"
-        }
+        },
+        "permissionsButton": "権限",
+        "modelsButton": "モデル選択"
       },
       "onboardingRun": {
         "title": "オンボーディングを実行",
@@ -865,6 +931,11 @@
         "verdictOk": "キーイベントは Handy に正常に届いています。",
         "verdictNoEvents": "イベントを検出できませんでした。テスト中にキーを押しましたか？",
         "failed": "診断に失敗しました: {{error}}"
+      },
+      "paths": {
+        "appData": "アプリデータ:",
+        "models": "モデル:",
+        "settings": "設定:"
       }
     },
     "about": {
@@ -956,7 +1027,8 @@
     "open": "開く",
     "copy": "コピー",
     "clear": "クリア",
-    "noOptionsFound": "オプションが見つかりません"
+    "noOptionsFound": "オプションが見つかりません",
+    "back": "戻る"
   },
   "errors": {
     "loadDirectory": "ディレクトリの読み込みエラー: {{error}}",
@@ -986,7 +1058,9 @@
     "filePostProcessFailedTitle": "後処理なしで文字起こししました",
     "filePostProcessFailed": "後処理が完了しなかったため、文字起こしをそのまま保存しました。",
     "fileTranscriptionFailedTitle": "ファイルの文字起こしに失敗しました",
-    "transcriptionFailedTitle": "文字起こしに失敗しました"
+    "transcriptionFailedTitle": "文字起こしに失敗しました",
+    "recordingFailed": "録音の開始に失敗しました: {{error}}",
+    "modelLoadFailedUnknown": "不明なモデル"
   },
   "notices": {
     "errorOne": "エラー {{n}} 件",
@@ -1023,5 +1097,9 @@
     "learnMore": "解決方法",
     "recorderBlocked": "現在ショートカットを記録できません。macOS の Secure Input がキーイベントをブロックしています。先に Secure Input の警告を解消してください。",
     "dismiss": "閉じる"
+  },
+  "accessibility": {
+    "permissionsDescription": "Handy が文字起こしテキストを入力するには、アクセシビリティ権限が必要です。",
+    "openSettings": "システム設定を開く"
   }
 }

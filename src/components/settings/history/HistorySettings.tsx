@@ -331,7 +331,11 @@ export const HistorySettings: React.FC = () => {
                 entry={entry}
                 job={jobs[entry.id]}
                 onToggleSaved={() => toggleSaved(entry.id)}
-                onCopyText={() => copyToClipboard(entry.transcription_text)}
+                onCopyText={() =>
+                  copyToClipboard(
+                    entry.post_processed_text || entry.transcription_text,
+                  )
+                }
                 getAudioUrl={getAudioUrl}
                 deleteAudio={deleteAudioEntry}
                 retryTranscription={commands.retryHistoryEntryTranscription}
@@ -411,6 +415,33 @@ const HistoryEntryComponent: React.FC<HistoryEntryProps> = ({
     if (!retrying) setCancelling(false);
   }, [retrying]);
   const hasTranscription = entry.transcription_text.trim().length > 0;
+  const tokenCount =
+    entry.post_process_total_tokens ??
+    (entry.post_process_prompt_tokens !== null &&
+    entry.post_process_completion_tokens !== null
+      ? entry.post_process_prompt_tokens + entry.post_process_completion_tokens
+      : null);
+  const formatDuration = (milliseconds: number) =>
+    milliseconds >= 1000
+      ? t("settings.history.stats.seconds", {
+          value: (milliseconds / 1000).toFixed(1),
+        })
+      : t("settings.history.stats.milliseconds", { value: milliseconds });
+  const stats = [
+    entry.transcription_duration_ms !== null
+      ? t("settings.history.stats.transcription", {
+          value: formatDuration(entry.transcription_duration_ms),
+        })
+      : null,
+    entry.post_process_duration_ms !== null
+      ? t("settings.history.stats.postProcess", {
+          value: formatDuration(entry.post_process_duration_ms),
+        })
+      : null,
+    tokenCount !== null
+      ? t("settings.history.stats.tokens", { count: tokenCount })
+      : null,
+  ].filter((value): value is string => value !== null);
   const folded = hasTranscription && !retrying && !expanded;
 
   // Offer "Show more" only when the folded text is actually cut off.
@@ -567,6 +598,11 @@ const HistoryEntryComponent: React.FC<HistoryEntryProps> = ({
                   t("settings.history.notTranscribed")
                 : t("settings.history.transcriptionFailed")}
         </p>
+        {hasTranscription && !retrying && stats.length > 0 && (
+          <p className="text-xs text-ink-3">
+            {stats.join(t("settings.history.stats.separator"))}
+          </p>
+        )}
         {hasTranscription && !retrying && (expanded || overflows) && (
           <button
             type="button"

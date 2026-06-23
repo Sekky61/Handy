@@ -33,7 +33,8 @@
       "retry": "Zkusit znovu",
       "chooseAnother": "Vybrat jiný model",
       "download": "Stáhnout modely ({{size}})",
-      "continue": "Pokračovat"
+      "continue": "Pokračovat",
+      "timeRemaining": "Zbývá {{time}}"
     },
     "models": {
       "small": {
@@ -63,11 +64,15 @@
     "permissions": {
       "microphone": {
         "name": "Mikrofon",
-        "why": "Aby vás Handy slyšel. Zvuk se mění na text přímo v tomto počítači a nikam se neodesílá."
+        "why": "Aby vás Handy slyšel. Zvuk se mění na text přímo v tomto počítači a nikam se neodesílá.",
+        "title": "Přístup k mikrofonu",
+        "description": "Potřebný pro zachycení vašeho hlasu k přepisu."
       },
       "accessibility": {
         "name": "Zpřístupnění",
-        "why": "Aby vaše zkratka fungovala v každé aplikaci a Handy mohl psát text tam, kde máte kurzor."
+        "why": "Aby vaše zkratka fungovala v každé aplikaci a Handy mohl psát text tam, kde máte kurzor.",
+        "title": "Přístup k usnadnění",
+        "description": "Potřebný pro psaní přepsaného textu do vašich aplikací."
       },
       "errors": {
         "checkFailed": "Nepodařilo se zkontrolovat oprávnění. Zkuste to prosím znovu.",
@@ -86,7 +91,12 @@
       "hintBoth": "Pro pokračování povolte obojí",
       "hintMicrophone": "Pro pokračování povolte mikrofon",
       "welcomeBack": "Vítejte zpět. Pokračujeme tam, kde jste skončili.",
-      "relaunch": "Zkratka po tomhle nereaguje? <relaunch>Restartujte Handy</relaunch> a skončíte hned zase tady."
+      "relaunch": "Zkratka po tomhle nereaguje? <relaunch>Restartujte Handy</relaunch> a skončíte hned zase tady.",
+      "title": "Vyžadována oprávnění",
+      "description": "Handy potřebuje několik oprávnění pro správné fungování.",
+      "grant": "Udělit oprávnění",
+      "granted": "Uděleno",
+      "allGranted": "Vše připraveno!"
     },
     "shell": {
       "back": "Zpět",
@@ -218,6 +228,16 @@
     "linux": {
       "tryIt": "Nefunguje to? <guide>Průvodce nastavením pro Linux</guide>",
       "done": "Nefunguje to v jiných aplikacích? <guide>Průvodce nastavením pro Linux</guide>"
+    },
+    "subtitle": "Pro začátek vyberte model pro přepis",
+    "existingModelsTitle": "Kompatibilní modely",
+    "downloadModelsTitle": "Dostupné ke stažení",
+    "showAllModels": "Zobrazit všech {{total}} modelů",
+    "showFewerModels": "Zobrazit méně modelů",
+    "recommended": "Doporučeno",
+    "modelCard": {
+      "accuracy": "přesnost",
+      "speed": "rychlost"
     }
   },
   "modelTable": {
@@ -322,7 +342,21 @@
     "modelUnloaded": "Model uvolněn",
     "noModelDownloadRequired": "Žádný model - je nutné stáhnout",
     "downloadSpeed": "{{speed}} MB/s",
-    "lockedWhileTranscribing": "Model můžete změnit, až se dokončí přepis v Historii."
+    "lockedWhileTranscribing": "Model můžete změnit, až se dokončí přepis v Historii.",
+    "deleteModel": "Smazat {{modelName}}",
+    "switching": "Přepínání...",
+    "capabilities": {
+      "languageSelection": "Podporuje více vstupních jazyků",
+      "languageCount": "{{total}} jazyků",
+      "translation": "Umí překládat do angličtiny",
+      "translate": "Přeložit do angličtiny",
+      "singleLanguage": "Podporuje pouze tento jazyk",
+      "languageOnly": "Pouze {{language}}",
+      "streaming": "Zobrazuje přepis živě, jak mluvíte"
+    },
+    "cancel": "Zrušit",
+    "cancelDownload": "Zrušit stahování",
+    "legacy": "Zastaralé"
   },
   "settings": {
     "modelSettings": {
@@ -352,7 +386,9 @@
           }
         },
         "errors": {
-          "set": "Nepodařilo se nastavit zkratku: {{error}}"
+          "set": "Nepodařilo se nastavit zkratku: {{error}}",
+          "restore": "Nepodařilo se obnovit původní zkratku",
+          "reset": "Nepodařilo se vrátit zkratku na původní hodnotu"
         }
       },
       "language": {
@@ -427,12 +463,26 @@
         "title": "Staré modely už s Handy nefungují",
         "description": "Zabírají {{size}} na vašem počítači.",
         "delete": "Smazat modely",
-        "deleteFailed": "Některé staré modely se nepodařilo smazat. Podrobnosti najdete v protokolu."
+        "deleteFailed": "Některé staré modely se nepodařilo smazat. Podrobnosti najdete v protokolu.",
+        "deleted": "Staré modely byly smazány"
       },
       "rescan": {
         "label": "Znovu prohledat",
         "tooltip": "Znovu prohledat modely přidané do složky modelů nebo mezipaměti Hugging Face mimo Handy"
-      }
+      },
+      "description": "Vyberte model přepisu nebo stáhněte další modely. Různé modely nabízejí různé úrovně přesnosti a rychlosti.",
+      "deleteConfirm": "Opravdu chcete smazat {{modelName}}? Pro opětovné použití jej budete muset znovu stáhnout.",
+      "deleteActiveConfirm": "{{modelName}} je váš aktivní model. Jeho smazáním se zastaví přepisy, dokud nevyberete nový model. Opravdu chcete pokračovat?",
+      "deleteTitle": "Smazat model",
+      "filters": {
+        "allLanguages": "Všechny jazyky",
+        "streaming": "Filtrovat modely podporující živý přepis",
+        "translation": "Filtrovat modely podporující překlad do angličtiny"
+      },
+      "noModelsMatch": "Tomuto filtru neodpovídají žádné modely.",
+      "yourModels": "Stažené modely",
+      "availableModels": "Dostupné ke stažení",
+      "searchPlaceholder": "Hledat modely podle názvu…"
     },
     "languages": {
       "title": "Jazyky"
@@ -624,7 +674,8 @@
           "asTranscribed": "Jak bylo přepsáno",
           "simplified": "Zjednodušené",
           "traditionalTw": "Tradiční (Tchaj-wan)",
-          "traditionalHk": "Tradiční (Hongkong)"
+          "traditionalHk": "Tradiční (Hongkong)",
+          "traditional": "Tradiční"
         }
       }
     },
@@ -717,7 +768,18 @@
       "showMore": "Zobrazit více",
       "showLess": "Zobrazit méně",
       "dropTitle": "Pusťte pro přepis",
-      "dropDescription": "Zobrazí se v historii."
+      "dropDescription": "Zobrazí se v historii.",
+      "retranscribeError": "Opětovný přepis se nezdařil. Zkuste to prosím znovu.",
+      "original": "Original",
+      "postProcessed": "Post-processed",
+      "stats": {
+        "transcription": "Transcription: {{value}}",
+        "postProcess": "Post-process: {{value}}",
+        "tokens": "Tokens: {{count}}",
+        "milliseconds": "{{value}} ms",
+        "seconds": "{{value}} s",
+        "separator": " · "
+      }
     },
     "debug": {
       "title": "Ladění",
@@ -748,7 +810,9 @@
       "whatsNewPreview": {
         "title": "Náhled novinek",
         "description": "Otevřít nejnovější přibalené poznámky k vydání bez označení jako zobrazené",
-        "button": "Náhled"
+        "button": "Náhled",
+        "noNotes": "Nebyly nalezeny žádné přibalené poznámky k vydání",
+        "error": "Nepodařilo se zobrazit náhled poznámek k vydání"
       },
       "onboardingPreview": {
         "title": "Náhled úvodního nastavení",
@@ -762,7 +826,9 @@
           "demo": "Ukázka",
           "try": "Vyzkoušet",
           "done": "Hotovo"
-        }
+        },
+        "permissionsButton": "Oprávnění",
+        "modelsButton": "Výběr modelu"
       },
       "onboardingRun": {
         "title": "Spustit úvodní nastavení",
@@ -865,6 +931,11 @@
         "verdictOk": "Události kláves dorazí do Handy normálně.",
         "verdictNoEvents": "Nebyly zachyceny žádné události — stiskli jste během testu nějaké klávesy?",
         "failed": "Diagnostika selhala: {{error}}"
+      },
+      "paths": {
+        "appData": "Data aplikace:",
+        "models": "Modely:",
+        "settings": "Nastavení:"
       }
     },
     "about": {
@@ -956,7 +1027,8 @@
     "open": "Otevřít",
     "copy": "Kopírovat",
     "clear": "Vymazat",
-    "noOptionsFound": "Nenalezeny žádné možnosti"
+    "noOptionsFound": "Nenalezeny žádné možnosti",
+    "back": "Zpět"
   },
   "errors": {
     "loadDirectory": "Chyba při načítání adresáře: {{error}}",
@@ -986,7 +1058,9 @@
     "filePostProcessFailedTitle": "Přepsáno bez následného zpracování",
     "filePostProcessFailed": "Následné zpracování se nedokončilo, takže byl přepis uložen beze změn.",
     "fileTranscriptionFailedTitle": "Přepis souboru selhal",
-    "transcriptionFailedTitle": "Přepis selhal"
+    "transcriptionFailedTitle": "Přepis selhal",
+    "recordingFailed": "Nepodařilo se spustit nahrávání: {{error}}",
+    "modelLoadFailedUnknown": "neznámý model"
   },
   "notices": {
     "errorOne": "{{n}} chyba",
@@ -1023,5 +1097,9 @@
     "learnMore": "Jak to vyřešit",
     "recorderBlocked": "Zkratky teď nelze nahrát — Secure Input v macOS blokuje události kláves. Nejprve vyřešte upozornění na Secure Input.",
     "dismiss": "Zavřít"
+  },
+  "accessibility": {
+    "permissionsDescription": "Handy potřebuje oprávnění usnadnění přístupu, aby mohlo psát přepsaný text.",
+    "openSettings": "Otevřít Nastavení systému"
   }
 }

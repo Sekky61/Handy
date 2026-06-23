@@ -33,7 +33,8 @@
       "retry": "ניסיון חוזר",
       "chooseAnother": "בחירת מודל אחר",
       "download": "הורדת מודלים ({{size}})",
-      "continue": "המשך"
+      "continue": "המשך",
+      "timeRemaining": "נותרו {{time}}"
     },
     "models": {
       "small": {
@@ -63,11 +64,15 @@
     "permissions": {
       "microphone": {
         "name": "מיקרופון",
-        "why": "כדי ש-Handy ישמע אותך. השמע הופך לטקסט במחשב הזה ולא מועלה לשום מקום."
+        "why": "כדי ש-Handy ישמע אותך. השמע הופך לטקסט במחשב הזה ולא מועלה לשום מקום.",
+        "title": "גישה למיקרופון",
+        "description": "נדרש כדי לשמוע את הקול שלך לצורך תמלול."
       },
       "accessibility": {
         "name": "נגישות",
-        "why": "כדי שקיצור המקשים שלך יעבוד בכל אפליקציה, ו-Handy יוכל להקליד את הטקסט איפה שהסמן נמצא."
+        "why": "כדי שקיצור המקשים שלך יעבוד בכל אפליקציה, ו-Handy יוכל להקליד את הטקסט איפה שהסמן נמצא.",
+        "title": "גישת נגישות",
+        "description": "נדרש כדי להקליד את הטקסט המתומלל לתוך האפליקציות שלך."
       },
       "errors": {
         "checkFailed": "בדיקת ההרשאות נכשלה. נסה שוב.",
@@ -86,7 +91,12 @@
       "hintBoth": "אשר את שתיהן כדי להמשיך",
       "hintMicrophone": "אשר את המיקרופון כדי להמשיך",
       "welcomeBack": "ברוך שובך. ממשיכים מהמקום שבו עצרת.",
-      "relaunch": "קיצור המקשים לא מגיב אחרי זה? <relaunch>הפעל מחדש את Handy</relaunch> ותחזור בדיוק לכאן."
+      "relaunch": "קיצור המקשים לא מגיב אחרי זה? <relaunch>הפעל מחדש את Handy</relaunch> ותחזור בדיוק לכאן.",
+      "title": "נדרשות הרשאות",
+      "description": "Handy צריך כמה הרשאות כדי לעבוד כמו שצריך.",
+      "grant": "תן הרשאה",
+      "granted": "ניתנה",
+      "allGranted": "הכול מוכן!"
     },
     "shell": {
       "back": "חזרה",
@@ -218,6 +228,16 @@
     "linux": {
       "tryIt": "לא עובד? <guide>מדריך ההתקנה ללינוקס</guide>",
       "done": "לא עובד באפליקציות אחרות? <guide>מדריך ההתקנה ללינוקס</guide>"
+    },
+    "subtitle": "כדי להתחיל, בחר מודל תמלול",
+    "existingModelsTitle": "מודלים תואמים",
+    "downloadModelsTitle": "זמינים להורדה",
+    "showAllModels": "הצג את כל {{total}} המודלים",
+    "showFewerModels": "הצג פחות מודלים",
+    "recommended": "מומלץ",
+    "modelCard": {
+      "accuracy": "דיוק",
+      "speed": "מהירות"
     }
   },
   "modelTable": {
@@ -322,7 +342,21 @@
     "modelUnloaded": "המודל נפרק",
     "noModelDownloadRequired": "אין מודל, נדרשת הורדה",
     "downloadSpeed": "{{speed}} MB/s",
-    "lockedWhileTranscribing": "אפשר יהיה להחליף מודל אחרי שהתמלול בהיסטוריה יסתיים."
+    "lockedWhileTranscribing": "אפשר יהיה להחליף מודל אחרי שהתמלול בהיסטוריה יסתיים.",
+    "switching": "מחליף...",
+    "deleteModel": "מחק את {{modelName}}",
+    "cancel": "ביטול",
+    "cancelDownload": "בטל הורדה",
+    "capabilities": {
+      "languageSelection": "תומך בכמה שפות קלט",
+      "singleLanguage": "תומך רק בשפה הזו",
+      "languageCount": "{{total}} שפות",
+      "languageOnly": "{{language}} בלבד",
+      "translation": "יכול לתרגם לאנגלית",
+      "translate": "תרגם לאנגלית",
+      "streaming": "מציג תמלול חי תוך כדי דיבור"
+    },
+    "legacy": "מדור קודם"
   },
   "settings": {
     "modelSettings": {
@@ -352,7 +386,9 @@
           }
         },
         "errors": {
-          "set": "הגדרת קיצור הדרך נכשלה: {{error}}"
+          "set": "הגדרת קיצור הדרך נכשלה: {{error}}",
+          "restore": "שחזור קיצור הדרך המקורי נכשל",
+          "reset": "איפוס קיצור הדרך לערך המקורי נכשל"
         }
       },
       "language": {
@@ -427,12 +463,26 @@
         "title": "מודלים ישנים כבר לא עובדים עם Handy",
         "description": "הם תופסים {{size}} במחשב שלך.",
         "delete": "מחיקת מודלים",
-        "deleteFailed": "לא ניתן היה למחוק חלק מהמודלים הישנים. פרטים נוספים ביומן."
+        "deleteFailed": "לא ניתן היה למחוק חלק מהמודלים הישנים. פרטים נוספים ביומן.",
+        "deleted": "המודלים הישנים נמחקו"
       },
       "rescan": {
         "label": "סריקה מחדש",
         "tooltip": "סריקה מחדש לאיתור מודלים שנוספו לתיקיית המודלים או למטמון של Hugging Face מחוץ ל-Handy"
-      }
+      },
+      "description": "בחר מודל תמלול או הורד מודלים נוספים. מודלים שונים מציעים רמות שונות של דיוק ומהירות.",
+      "yourModels": "מודלים שהורדו",
+      "availableModels": "זמינים להורדה",
+      "deleteConfirm": "האם למחוק את {{modelName}}? יהיה צורך להוריד אותו שוב כדי להשתמש בו.",
+      "deleteActiveConfirm": "{{modelName}} הוא המודל הפעיל שלך כרגע. מחיקה שלו תעצור את התמלול עד שתבחר מודל חדש. להמשיך?",
+      "deleteTitle": "מחיקת מודל",
+      "filters": {
+        "allLanguages": "כל השפות",
+        "streaming": "סינון דגמים התומכים בתמלול חי",
+        "translation": "סינון דגמים התומכים בתרגום לאנגלית"
+      },
+      "noModelsMatch": "אין מודלים שמתאימים לסינון הזה.",
+      "searchPlaceholder": "חיפוש מודלים לפי שם…"
     },
     "languages": {
       "title": "שפות"
@@ -624,7 +674,8 @@
           "asTranscribed": "כפי שתומלל",
           "simplified": "מפושט",
           "traditionalTw": "מסורתית (טייוואן)",
-          "traditionalHk": "מסורתית (הונג קונג)"
+          "traditionalHk": "מסורתית (הונג קונג)",
+          "traditional": "מסורתי"
         }
       }
     },
@@ -717,7 +768,18 @@
       "showMore": "הצג עוד",
       "showLess": "הצג פחות",
       "dropTitle": "שחררו כדי לתמלל",
-      "dropDescription": "הוא יופיע בהיסטוריה."
+      "dropDescription": "הוא יופיע בהיסטוריה.",
+      "retranscribeError": "תמלול מחדש נכשל. נסה שוב.",
+      "original": "Original",
+      "postProcessed": "Post-processed",
+      "stats": {
+        "transcription": "Transcription: {{value}}",
+        "postProcess": "Post-process: {{value}}",
+        "tokens": "Tokens: {{count}}",
+        "milliseconds": "{{value}} ms",
+        "seconds": "{{value}} s",
+        "separator": " · "
+      }
     },
     "debug": {
       "title": "ניפוי שגיאות",
@@ -748,7 +810,9 @@
       "whatsNewPreview": {
         "title": "תצוגה מקדימה של מה חדש",
         "description": "פתח את הערת הגרסה המצורפת האחרונה בלי לסמן אותה כנצפתה",
-        "button": "תצוגה מקדימה"
+        "button": "תצוגה מקדימה",
+        "noNotes": "לא נמצאו הערות גרסה מצורפות",
+        "error": "הצגת התצוגה המקדימה של הערות הגרסה נכשלה"
       },
       "onboardingPreview": {
         "title": "תצוגה מקדימה של ההגדרה הראשונית",
@@ -762,7 +826,9 @@
           "demo": "הדגמה",
           "try": "נסה",
           "done": "הכול מוכן"
-        }
+        },
+        "permissionsButton": "הרשאות",
+        "modelsButton": "בחירת מודל"
       },
       "onboardingRun": {
         "title": "הרצת היכרות ראשונית",
@@ -865,6 +931,11 @@
         "verdictOk": "אירועי מקשים מגיעים ל-Handy כרגיל.",
         "verdictNoEvents": "לא נקלטו אירועים — האם הקשת על מקשים במהלך הבדיקה?",
         "failed": "האבחון נכשל: {{error}}"
+      },
+      "paths": {
+        "appData": "נתוני אפליקציה:",
+        "models": "מודלים:",
+        "settings": "הגדרות:"
       }
     },
     "about": {
@@ -956,7 +1027,8 @@
     "open": "פתח",
     "copy": "העתק",
     "clear": "נקה",
-    "noOptionsFound": "לא נמצאו אפשרויות"
+    "noOptionsFound": "לא נמצאו אפשרויות",
+    "back": "חזרה"
   },
   "errors": {
     "loadDirectory": "שגיאה בטעינת תיקייה: {{error}}",
@@ -986,7 +1058,9 @@
     "filePostProcessFailedTitle": "תומלל ללא עיבוד משלים",
     "filePostProcessFailed": "העיבוד המשלים לא הסתיים, ולכן התמלול נשמר כפי שהוא.",
     "fileTranscriptionFailedTitle": "תמלול הקובץ נכשל",
-    "transcriptionFailedTitle": "התמלול נכשל"
+    "transcriptionFailedTitle": "התמלול נכשל",
+    "recordingFailed": "הפעלת ההקלטה נכשלה: {{error}}",
+    "modelLoadFailedUnknown": "מודל לא ידוע"
   },
   "notices": {
     "errorOne": "{{n}} שגיאה",
@@ -1023,5 +1097,9 @@
     "learnMore": "איך לתקן את זה",
     "recorderBlocked": "לא ניתן להקליט קיצורים כרגע — Secure Input של macOS חוסם אירועי מקשים. פתור תחילה את אזהרת Secure Input.",
     "dismiss": "התעלם"
+  },
+  "accessibility": {
+    "permissionsDescription": "Handy צריך הרשאות נגישות כדי להקליד את הטקסט המתומלל.",
+    "openSettings": "פתח את הגדרות המערכת"
   }
 }

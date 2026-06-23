@@ -4,7 +4,7 @@ use crate::audio_feedback::{play_feedback_sound, play_feedback_sound_blocking, S
 use crate::audio_toolkit::VadPolicy;
 use crate::language_detection::{LanguageDecision, LanguageSource};
 use crate::managers::audio::{recording_notice_code, AudioRecordingManager};
-use crate::managers::history::HistoryManager;
+use crate::managers::history::{HistoryEntryStats, HistoryManager};
 use crate::managers::model::ModelManager;
 use crate::managers::transcription::policy::{live_decode, LiveDecode, ModelTraits};
 use crate::managers::transcription::StreamWorkKind;
@@ -182,14 +182,14 @@ fn is_blank_transcription(transcription: &str) -> bool {
     transcription.trim().is_empty()
 }
 
-fn non_blank_post_processed_text(text: String) -> Option<String> {
-    if is_blank_transcription(&text) {
+fn non_blank_post_processed_text(result: PostProcessResult) -> Option<PostProcessResult> {
+    if is_blank_transcription(&result.text) {
         warn!(
             "Post-processing returned an empty response. Falling back to original transcription."
         );
         None
     } else {
-        Some(text)
+        Some(result)
     }
 }
 
@@ -222,10 +222,29 @@ fn should_use_streaming_overlay(style: OverlayStyle, is_streaming: bool) -> bool
 enum PostProcessOutcome {
     /// There was no speech to process.
     Skipped,
-    Done(String),
+    Done(PostProcessResult),
     /// The user asked for it, but it couldn't run or produced nothing, so the
     /// transcript goes out as it is.
     Failed,
+}
+
+#[derive(Debug, PartialEq, Eq)]
+struct PostProcessResult {
+    text: String,
+    prompt_tokens: Option<i64>,
+    completion_tokens: Option<i64>,
+    total_tokens: Option<i64>,
+}
+
+impl PostProcessResult {
+    fn with_usage(text: String, usage: Option<crate::llm_client::ChatCompletionUsage>) -> Self {
+        Self {
+            text,
+            prompt_tokens: usage.as_ref().and_then(|usage| usage.prompt_tokens),
+            completion_tokens: usage.as_ref().and_then(|usage| usage.completion_tokens),
+            total_tokens: usage.as_ref().and_then(|usage| usage.total_tokens),
+        }
+    }
 }
 
 async fn post_process_transcription(
@@ -337,7 +356,7 @@ async fn post_process_transcription(
                                 "Apple Intelligence post-processing succeeded. Output length: {} chars",
                                 result.len()
                             );
-                            PostProcessOutcome::Done(result)
+                            PostProcessOutcome::Done(PostProcessResult::with_usage(result, None))
                         }
                     }
                     Err(err) => {
@@ -367,7 +386,7 @@ async fn post_process_transcription(
             "additionalProperties": false
         });
 
-        match crate::llm_client::send_chat_completion_with_schema(
+        match crate::llm_client::send_chat_completion_with_schema_and_usage(
             &provider,
             api_key.clone(),
             &model,
@@ -378,7 +397,12 @@ async fn post_process_transcription(
         )
         .await
         {
-            Ok(Some(content)) => {
+            Ok(completion) => {
+                let usage = completion.usage;
+                let Some(content) = completion.content else {
+                    error!("LLM API response has no content");
+                    return PostProcessOutcome::Failed;
+                };
                 // Parse the JSON response to extract the transcription field
                 let content = strip_think_block(&content);
                 match serde_json::from_str::<serde_json::Value>(content) {
@@ -393,12 +417,18 @@ async fn post_process_transcription(
                                 provider.id,
                                 result.len()
                             );
-                            return PostProcessOutcome::Done(result);
+                            return PostProcessOutcome::Done(PostProcessResult::with_usage(
+                                result,
+                                usage,
+                            ));
                         } else {
                             error!("Structured output response missing 'transcription' field");
                             let result = strip_invisible_chars(content);
                             log_post_process_output(&provider.id, &result);
-                            return PostProcessOutcome::Done(result);
+                            return PostProcessOutcome::Done(PostProcessResult::with_usage(
+                                result,
+                                usage,
+                            ));
                         }
                     }
                     Err(e) => {
@@ -408,13 +438,11 @@ async fn post_process_transcription(
                         );
                         let result = strip_invisible_chars(content);
                         log_post_process_output(&provider.id, &result);
-                        return PostProcessOutcome::Done(result);
+                        return PostProcessOutcome::Done(PostProcessResult::with_usage(
+                            result, usage,
+                        ));
                     }
                 }
-            }
-            Ok(None) => {
-                error!("LLM API response has no content");
-                return PostProcessOutcome::Failed;
             }
             Err(e) => {
                 warn!(
@@ -430,7 +458,7 @@ async fn post_process_transcription(
     let processed_prompt = prompt.replace("${output}", transcription);
     debug!("Processed prompt length: {} chars", processed_prompt.len());
 
-    match crate::llm_client::send_chat_completion(
+    match crate::llm_client::send_chat_completion_with_usage(
         &provider,
         api_key,
         &model,
@@ -439,7 +467,11 @@ async fn post_process_transcription(
     )
     .await
     {
-        Ok(Some(content)) => {
+        Ok(completion) => {
+            let Some(content) = completion.content else {
+                error!("LLM API response has no content");
+                return PostProcessOutcome::Failed;
+            };
             let content = strip_invisible_chars(strip_think_block(&content));
             log_post_process_output(&provider.id, &content);
             debug!(
@@ -447,11 +479,10 @@ async fn post_process_transcription(
                 provider.id,
                 content.len()
             );
-            PostProcessOutcome::Done(content)
-        }
-        Ok(None) => {
-            error!("LLM API response has no content");
-            PostProcessOutcome::Failed
+            PostProcessOutcome::Done(PostProcessResult::with_usage(
+                content,
+                completion.usage,
+            ))
         }
         Err(e) => {
             error!(
@@ -470,6 +501,10 @@ pub(crate) struct ProcessedTranscription {
     pub post_process_prompt: Option<String>,
     /// `final_text` is the bare transcript because post-processing failed.
     pub post_process_failed: bool,
+    pub post_process_duration_ms: Option<i64>,
+    pub post_process_prompt_tokens: Option<i64>,
+    pub post_process_completion_tokens: Option<i64>,
+    pub post_process_total_tokens: Option<i64>,
 }
 
 pub(crate) async fn process_transcription_output(
@@ -482,8 +517,13 @@ pub(crate) async fn process_transcription_output(
     let mut post_processed_text: Option<String> = None;
     let mut post_process_prompt: Option<String> = None;
     let mut post_process_failed = false;
+    let mut post_process_duration_ms = None;
+    let mut post_process_prompt_tokens = None;
+    let mut post_process_completion_tokens = None;
+    let mut post_process_total_tokens = None;
 
     if post_process {
+        let post_process_time = Instant::now();
         // A reply that's blank once cleaned is no better than none.
         let outcome = match tokio::time::timeout(
             POST_PROCESS_TIMEOUT,
@@ -502,12 +542,16 @@ pub(crate) async fn process_transcription_output(
                 PostProcessOutcome::Failed
             }
         };
+        post_process_duration_ms = Some(post_process_time.elapsed().as_millis() as i64);
         match outcome {
             PostProcessOutcome::Skipped => {}
             PostProcessOutcome::Failed => post_process_failed = true,
             PostProcessOutcome::Done(processed_text) => {
-                post_processed_text = Some(processed_text.clone());
-                final_text = processed_text;
+                post_process_prompt_tokens = processed_text.prompt_tokens;
+                post_process_completion_tokens = processed_text.completion_tokens;
+                post_process_total_tokens = processed_text.total_tokens;
+                post_processed_text = Some(processed_text.text.clone());
+                final_text = processed_text.text;
 
                 if let Some(prompt_id) = &settings.post_process_selected_prompt_id {
                     if let Some(prompt) = settings
@@ -527,6 +571,10 @@ pub(crate) async fn process_transcription_output(
         post_processed_text,
         post_process_prompt,
         post_process_failed,
+        post_process_duration_ms,
+        post_process_prompt_tokens,
+        post_process_completion_tokens,
+        post_process_total_tokens,
     }
 }
 
@@ -870,6 +918,8 @@ impl ShortcutAction for TranscribeAction {
                         tm.transcribe_recording(samples)
                             .map_err(|err| err.to_string())
                     };
+                    let transcription_duration_ms =
+                        transcription_time.elapsed().as_millis() as i64;
 
                     // Await WAV save and verify
                     let wav_saved = match wav_handle.await {
@@ -909,7 +959,7 @@ impl ShortcutAction for TranscribeAction {
                         }) => {
                             debug!(
                                 "Transcription completed in {:?}: '{}'",
-                                transcription_time.elapsed(),
+                                transcription_duration_ms,
                                 utils::redact_text(&transcription)
                             );
 
@@ -948,6 +998,16 @@ impl ShortcutAction for TranscribeAction {
                                     processed.post_processed_text.clone(),
                                     processed.post_process_prompt.clone(),
                                     language,
+                                    HistoryEntryStats {
+                                        transcription_duration_ms: Some(transcription_duration_ms),
+                                        post_process_duration_ms: processed.post_process_duration_ms,
+                                        post_process_prompt_tokens: processed
+                                            .post_process_prompt_tokens,
+                                        post_process_completion_tokens: processed
+                                            .post_process_completion_tokens,
+                                        post_process_total_tokens: processed
+                                            .post_process_total_tokens,
+                                    },
                                 ) {
                                     error!("Failed to save history entry: {}", err);
                                 }
@@ -1099,6 +1159,12 @@ impl ShortcutAction for TranscribeAction {
                                     None,
                                     None,
                                     None,
+                                    HistoryEntryStats {
+                                        transcription_duration_ms: Some(
+                                            transcription_duration_ms,
+                                        ),
+                                        ..Default::default()
+                                    },
                                 ) {
                                     error!("Failed to save failed history entry: {}", save_err);
                                 }
@@ -1197,7 +1263,7 @@ mod tests {
     use super::{
         complete_unless_cancelled, is_blank_transcription, non_blank_post_processed_text,
         post_process_transcription, should_use_streaming_overlay, strip_invisible_chars,
-        strip_think_block, PostProcessOutcome,
+        strip_think_block, PostProcessOutcome, PostProcessResult,
     };
     use crate::settings::{get_default_settings, AppSettings, OverlayStyle};
     use std::future;
@@ -1270,7 +1336,10 @@ mod tests {
         let url = serve_once(r#"{"choices":[{"message":{"content":"polished"}}]}"#);
         assert_eq!(
             run_post_process(&post_process_settings(&url), "hello"),
-            PostProcessOutcome::Done("polished".to_string())
+            PostProcessOutcome::Done(PostProcessResult::with_usage(
+                "polished".to_string(),
+                None,
+            ))
         );
     }
 
@@ -1299,7 +1368,13 @@ mod tests {
     #[test]
     fn blank_post_processed_text_is_rejected() {
         for text in ["", "   ", "\t\n\r\n", "\u{00A0}\u{2003}"] {
-            assert_eq!(non_blank_post_processed_text(text.to_string()), None);
+            assert_eq!(
+                non_blank_post_processed_text(PostProcessResult::with_usage(
+                    text.to_string(),
+                    None,
+                )),
+                None
+            );
         }
     }
 
@@ -1311,7 +1386,13 @@ mod tests {
             "<think>reasoning only</think>\n\u{200B} ",
         ] {
             let text = strip_invisible_chars(strip_think_block(text));
-            assert_eq!(non_blank_post_processed_text(text), None);
+            assert_eq!(
+                non_blank_post_processed_text(PostProcessResult::with_usage(
+                    text.to_string(),
+                    None,
+                )),
+                None
+            );
         }
     }
 
@@ -1319,8 +1400,11 @@ mod tests {
     fn non_blank_post_processed_text_is_preserved() {
         for text in ["Cleaned text.", "  정리된 문장입니다.\n", "0"] {
             assert_eq!(
-                non_blank_post_processed_text(text.to_string()),
-                Some(text.to_string())
+                non_blank_post_processed_text(PostProcessResult::with_usage(
+                    text.to_string(),
+                    None,
+                )),
+                Some(PostProcessResult::with_usage(text.to_string(), None))
             );
         }
     }

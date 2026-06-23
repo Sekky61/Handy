@@ -33,7 +33,8 @@
       "retry": "Försök igen",
       "chooseAnother": "Välj en annan modell",
       "download": "Ladda ner modeller ({{size}})",
-      "continue": "Fortsätt"
+      "continue": "Fortsätt",
+      "timeRemaining": "{{time}} kvar"
     },
     "models": {
       "small": {
@@ -63,11 +64,15 @@
     "permissions": {
       "microphone": {
         "name": "Mikrofon",
-        "why": "Så att Handy kan höra dig. Ljudet omvandlas till text på den här datorn och laddas aldrig upp."
+        "why": "Så att Handy kan höra dig. Ljudet omvandlas till text på den här datorn och laddas aldrig upp.",
+        "title": "Mikrofonåtkomst",
+        "description": "Krävs för att höra din röst för transkription."
       },
       "accessibility": {
         "name": "Hjälpmedel",
-        "why": "Så att din genväg fungerar i alla appar och Handy kan skriva texten där markören står."
+        "why": "Så att din genväg fungerar i alla appar och Handy kan skriva texten där markören står.",
+        "title": "Hjälpmedelsåtkomst",
+        "description": "Krävs för att skriva transkriberad text i dina program."
       },
       "errors": {
         "checkFailed": "Misslyckades med att kontrollera behörigheter. Försök igen.",
@@ -86,7 +91,12 @@
       "hintBoth": "Tillåt båda för att fortsätta",
       "hintMicrophone": "Tillåt mikrofonen för att fortsätta",
       "welcomeBack": "Välkommen tillbaka. Vi fortsätter där du slutade.",
-      "relaunch": "Svarar inte genvägen efter detta? <relaunch>Starta om Handy</relaunch> så hamnar du direkt här igen."
+      "relaunch": "Svarar inte genvägen efter detta? <relaunch>Starta om Handy</relaunch> så hamnar du direkt här igen.",
+      "title": "Behörigheter krävs",
+      "description": "Handy behöver ett par behörigheter för att fungera korrekt.",
+      "grant": "Bevilja behörighet",
+      "granted": "Beviljad",
+      "allGranted": "Allt klart!"
     },
     "shell": {
       "back": "Tillbaka",
@@ -218,6 +228,16 @@
     "linux": {
       "tryIt": "Fungerar det inte? <guide>Installationsguide för Linux</guide>",
       "done": "Fungerar det inte i andra appar? <guide>Installationsguide för Linux</guide>"
+    },
+    "subtitle": "För att komma igång, välj en transkriptionsmodell",
+    "existingModelsTitle": "Kompatibla modeller",
+    "downloadModelsTitle": "Tillgängliga för nedladdning",
+    "showAllModels": "Visa alla {{total}} modeller",
+    "showFewerModels": "Visa färre modeller",
+    "recommended": "Rekommenderat",
+    "modelCard": {
+      "accuracy": "noggrannhet",
+      "speed": "hastighet"
     }
   },
   "modelTable": {
@@ -322,7 +342,21 @@
     "modelUnloaded": "Modell avlastad",
     "noModelDownloadRequired": "Ingen modell - Nedladdning krävs",
     "downloadSpeed": "{{speed}} MB/s",
-    "lockedWhileTranscribing": "Du kan byta modell när transkriberingen i Historik är klar."
+    "lockedWhileTranscribing": "Du kan byta modell när transkriberingen i Historik är klar.",
+    "switching": "Byter...",
+    "deleteModel": "Ta bort {{modelName}}",
+    "cancel": "Avbryt",
+    "cancelDownload": "Avbryt nedladdning",
+    "capabilities": {
+      "languageSelection": "Stöder flera indataspråk",
+      "singleLanguage": "Stöder endast detta språk",
+      "languageCount": "{{total}} språk",
+      "languageOnly": "Endast {{language}}",
+      "translation": "Kan översätta till engelska",
+      "translate": "Översätt till engelska",
+      "streaming": "Visar transkription i realtid medan du talar"
+    },
+    "legacy": "Äldre"
   },
   "settings": {
     "modelSettings": {
@@ -352,7 +386,9 @@
           }
         },
         "errors": {
-          "set": "Misslyckades med att ställa in kortkommando: {{error}}"
+          "set": "Misslyckades med att ställa in kortkommando: {{error}}",
+          "restore": "Misslyckades med att återställa ursprungligt kortkommando",
+          "reset": "Misslyckades med att återställa kortkommando till ursprungsvärdet"
         }
       },
       "language": {
@@ -427,12 +463,26 @@
         "title": "Gamla modeller fungerar inte längre med Handy",
         "description": "De tar upp {{size}} på din dator.",
         "delete": "Ta bort modeller",
-        "deleteFailed": "Vissa gamla modeller kunde inte tas bort. Se loggen för mer information."
+        "deleteFailed": "Vissa gamla modeller kunde inte tas bort. Se loggen för mer information.",
+        "deleted": "Gamla modeller borttagna"
       },
       "rescan": {
         "label": "Skanna om",
         "tooltip": "Skanna om efter modeller som lagts till i modellmappen eller Hugging Face-cachen utanför Handy"
-      }
+      },
+      "description": "Välj en transkriptionsmodell eller ladda ner ytterligare modeller. Olika modeller erbjuder varierande nivåer av noggrannhet och hastighet.",
+      "yourModels": "Nedladdade modeller",
+      "availableModels": "Tillgängliga att ladda ner",
+      "deleteConfirm": "Är du säker på att du vill ta bort {{modelName}}? Du måste ladda ner den igen för att använda den.",
+      "deleteActiveConfirm": "{{modelName}} är din aktiva modell. Om du tar bort den avbryts transkriptioner tills du väljer en ny modell. Är du säker?",
+      "deleteTitle": "Ta bort modell",
+      "filters": {
+        "allLanguages": "Alla språk",
+        "streaming": "Filtrera modeller som stöder transkription i realtid",
+        "translation": "Filtrera modeller som stöder översättning till engelska"
+      },
+      "noModelsMatch": "Inga modeller matchar detta filter.",
+      "searchPlaceholder": "Sök modeller efter namn…"
     },
     "languages": {
       "title": "Språk"
@@ -624,7 +674,8 @@
           "asTranscribed": "Som transkriberat",
           "simplified": "Förenklad",
           "traditionalTw": "Traditionell (Taiwan)",
-          "traditionalHk": "Traditionell (Hongkong)"
+          "traditionalHk": "Traditionell (Hongkong)",
+          "traditional": "Traditionell"
         }
       }
     },
@@ -717,7 +768,18 @@
       "showMore": "Visa mer",
       "showLess": "Visa mindre",
       "dropTitle": "Släpp för att transkribera",
-      "dropDescription": "Den visas i historiken."
+      "dropDescription": "Den visas i historiken.",
+      "retranscribeError": "Misslyckades med att transkribera igen. Försök igen.",
+      "original": "Original",
+      "postProcessed": "Post-processed",
+      "stats": {
+        "transcription": "Transcription: {{value}}",
+        "postProcess": "Post-process: {{value}}",
+        "tokens": "Tokens: {{count}}",
+        "milliseconds": "{{value}} ms",
+        "seconds": "{{value}} s",
+        "separator": " · "
+      }
     },
     "debug": {
       "title": "Felsökning",
@@ -748,7 +810,9 @@
       "whatsNewPreview": {
         "title": "Förhandsvisa nyheter",
         "description": "Öppna den senaste medföljande versionsinformationen utan att markera den som visad",
-        "button": "Förhandsvisa"
+        "button": "Förhandsvisa",
+        "noNotes": "Ingen medföljande versionsinformation hittades",
+        "error": "Det gick inte att förhandsvisa versionsinformationen"
       },
       "onboardingPreview": {
         "title": "Förhandsvisa introduktionen",
@@ -762,7 +826,9 @@
           "demo": "Demo",
           "try": "Testa",
           "done": "Klart"
-        }
+        },
+        "permissionsButton": "Behörigheter",
+        "modelsButton": "Modellval"
       },
       "onboardingRun": {
         "title": "Kör introduktionen",
@@ -865,6 +931,11 @@
         "verdictOk": "Tangenthändelser når Handy som vanligt.",
         "verdictNoEvents": "Inga händelser fångades — tryckte du på några tangenter under testet?",
         "failed": "Diagnostiken misslyckades: {{error}}"
+      },
+      "paths": {
+        "appData": "Appdata:",
+        "models": "Modeller:",
+        "settings": "Inställningar:"
       }
     },
     "about": {
@@ -956,7 +1027,8 @@
     "open": "Öppna",
     "copy": "Kopiera",
     "clear": "Rensa",
-    "noOptionsFound": "Inga alternativ hittades"
+    "noOptionsFound": "Inga alternativ hittades",
+    "back": "Tillbaka"
   },
   "errors": {
     "loadDirectory": "Fel vid laddning av mapp: {{error}}",
@@ -986,7 +1058,9 @@
     "filePostProcessFailedTitle": "Transkriberat utan efterbearbetning",
     "filePostProcessFailed": "Efterbearbetningen slutfördes inte, så transkriptionen sparades som den är.",
     "fileTranscriptionFailedTitle": "Transkriptionen av filen misslyckades",
-    "transcriptionFailedTitle": "Transkriptionen misslyckades"
+    "transcriptionFailedTitle": "Transkriptionen misslyckades",
+    "recordingFailed": "Misslyckades med att starta inspelning: {{error}}",
+    "modelLoadFailedUnknown": "okänd modell"
   },
   "notices": {
     "errorOne": "{{n}} fel",
@@ -1023,5 +1097,9 @@
     "learnMore": "Så här löser du det",
     "recorderBlocked": "Det går inte att spela in kortkommandon just nu — macOS Secure Input blockerar tangenthändelser. Lös varningen om Secure Input först.",
     "dismiss": "Avfärda"
+  },
+  "accessibility": {
+    "permissionsDescription": "Handy behöver behörighet för hjälpmedel för att kunna skriva transkriberad text.",
+    "openSettings": "Öppna systeminställningar"
   }
 }

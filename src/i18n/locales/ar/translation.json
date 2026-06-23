@@ -20,7 +20,6 @@
     "history": "السجل",
     "debug": "تصحيح الأخطاء",
     "about": "حول",
-    "models": "النماذج",
     "stt": "STT"
   },
   "onboarding": {
@@ -34,7 +33,8 @@
       "retry": "حاول مرة أخرى",
       "chooseAnother": "اختر نموذجًا مختلفًا",
       "download": "تنزيل النماذج ({{size}})",
-      "continue": "متابعة"
+      "continue": "متابعة",
+      "timeRemaining": "متبقٍ {{time}}"
     },
     "models": {
       "small": {
@@ -64,11 +64,15 @@
     "permissions": {
       "microphone": {
         "name": "الميكروفون",
-        "why": "ليتمكن Handy من سماعك. يُحوَّل الصوت إلى نص على هذا الكمبيوتر ولا يُرفع أبدًا."
+        "why": "ليتمكن Handy من سماعك. يُحوَّل الصوت إلى نص على هذا الكمبيوتر ولا يُرفع أبدًا.",
+        "title": "الوصول إلى الميكروفون",
+        "description": ".مطلوب لسماع صوتك من أجل التفريغ الصوتي"
       },
       "accessibility": {
         "name": "إمكانية الوصول",
-        "why": "ليعمل اختصارك في كل التطبيقات، ويتمكن Handy من كتابة النص حيث يوجد المؤشر."
+        "why": "ليعمل اختصارك في كل التطبيقات، ويتمكن Handy من كتابة النص حيث يوجد المؤشر.",
+        "title": "إمكانية الوصول",
+        "description": ".مطلوب لكتابة النص المفرغ في تطبيقاتك"
       },
       "errors": {
         "checkFailed": "فشل التحقق من الأذونات. يرجير المحاولة مرة أخرى.",
@@ -87,7 +91,12 @@
       "hintBoth": "اسمح بالإذنين للمتابعة",
       "hintMicrophone": "اسمح بالوصول إلى الميكروفون للمتابعة",
       "welcomeBack": "أهلًا بعودتك. سنكمل من حيث توقفت.",
-      "relaunch": "الاختصار لا يستجيب بعد هذا؟ <relaunch>أعد تشغيل Handy</relaunch> وستعود إلى هنا مباشرة."
+      "relaunch": "الاختصار لا يستجيب بعد هذا؟ <relaunch>أعد تشغيل Handy</relaunch> وستعود إلى هنا مباشرة.",
+      "title": "الأذونات المطلوبة",
+      "description": ".يحتاج Handy إلى بعض الأذونات ليعمل بشكل صحيح",
+      "grant": "منح الإذن",
+      "granted": "تم المنح",
+      "allGranted": "كل شيء جاهز!"
     },
     "shell": {
       "back": "رجوع",
@@ -219,6 +228,16 @@
     "linux": {
       "tryIt": "لا يعمل؟ <guide>دليل إعداد Linux</guide>",
       "done": "لا يعمل في تطبيقات أخرى؟ <guide>دليل إعداد Linux</guide>"
+    },
+    "subtitle": "للبدء، اختر نموذج التفريغ الصوتي",
+    "existingModelsTitle": "النماذج المتوافقة",
+    "downloadModelsTitle": "متاح للتنزيل",
+    "showAllModels": "عرض كل النماذج ({{total}})",
+    "showFewerModels": "عرض عدد أقل من النماذج",
+    "recommended": "موصى به",
+    "modelCard": {
+      "accuracy": "الدقة",
+      "speed": "السرعة"
     }
   },
   "modelTable": {
@@ -323,7 +342,21 @@
     "modelUnloaded": "تم إلغاء تحميل النموذج",
     "noModelDownloadRequired": "لا يوجد نموذج - التنزيل مطلوب",
     "downloadSpeed": "{{speed}} ميجابايت/ث",
-    "lockedWhileTranscribing": "يمكنك تغيير النموذج بعد انتهاء النسخ في السجل."
+    "lockedWhileTranscribing": "يمكنك تغيير النموذج بعد انتهاء النسخ في السجل.",
+    "deleteModel": "حذف {{modelName}}",
+    "switching": "جارٍ التبديل...",
+    "cancel": "إلغاء",
+    "cancelDownload": "إلغاء التنزيل",
+    "capabilities": {
+      "languageSelection": "يدعم اختيار اللغة",
+      "singleLanguage": "يدعم هذه اللغة فقط",
+      "languageCount": "{{total}} لغة",
+      "languageOnly": "{{language}} فقط",
+      "translation": "يدعم الترجمة",
+      "translate": "ترجمة",
+      "streaming": "يعرض النسخ المباشر أثناء التحدث"
+    },
+    "legacy": "قديم"
   },
   "settings": {
     "modelSettings": {
@@ -353,7 +386,9 @@
           }
         },
         "errors": {
-          "set": "فشل تعيين الاختصار: {{error}}"
+          "set": "فشل تعيين الاختصار: {{error}}",
+          "restore": "فشل استعادة الاختصار الأصلي",
+          "reset": "فشل إعادة تعيين الاختصار إلى قيمته الأصلية"
         }
       },
       "language": {
@@ -428,12 +463,26 @@
         "title": "النماذج القديمة لم تعد تعمل مع Handy",
         "description": "إنها تشغل {{size}} على جهاز الكمبيوتر الخاص بك.",
         "delete": "حذف النماذج",
-        "deleteFailed": "تعذّر حذف بعض النماذج القديمة. تحقق من السجل لمزيد من التفاصيل."
+        "deleteFailed": "تعذّر حذف بعض النماذج القديمة. تحقق من السجل لمزيد من التفاصيل.",
+        "deleted": "تم حذف النماذج القديمة"
       },
       "rescan": {
         "label": "إعادة الفحص",
         "tooltip": "إعادة الفحص بحثًا عن النماذج المضافة إلى مجلد النماذج أو ذاكرة Hugging Face التخزينية المؤقتة خارج Handy"
-      }
+      },
+      "description": "اختر نموذج نسخ أو قم بتنزيل نماذج إضافية. تقدم النماذج المختلفة مستويات متفاوتة من الدقة والسرعة.",
+      "yourModels": "النماذج المحمّلة",
+      "availableModels": "متاح للتنزيل",
+      "deleteConfirm": "هل أنت متأكد أنك تريد حذف {{modelName}}؟ ستحتاج إلى تنزيله مرة أخرى لاستخدامه.",
+      "deleteActiveConfirm": "{{modelName}} هو النموذج النشط حاليًا. حذفه سيوقف النسخ حتى تختار نموذجًا جديدًا. هل أنت متأكد؟",
+      "deleteTitle": "حذف النموذج",
+      "filters": {
+        "allLanguages": "جميع اللغات",
+        "streaming": "تصفية النماذج التي تدعم النسخ المباشر",
+        "translation": "تصفية النماذج التي تدعم الترجمة إلى الإنجليزية"
+      },
+      "noModelsMatch": "لا توجد نماذج مطابقة لهذا الفلتر.",
+      "searchPlaceholder": "ابحث عن النماذج بالاسم…"
     },
     "languages": {
       "title": "اللغات"
@@ -625,7 +674,8 @@
           "asTranscribed": "كما نُسخ",
           "simplified": "مبسطة",
           "traditionalTw": "تقليدية (تايوان)",
-          "traditionalHk": "تقليدية (هونغ كونغ)"
+          "traditionalHk": "تقليدية (هونغ كونغ)",
+          "traditional": "تقليدية"
         }
       }
     },
@@ -718,7 +768,18 @@
       "showMore": "عرض المزيد",
       "showLess": "عرض أقل",
       "dropTitle": "أفلت الملف لنسخه",
-      "dropDescription": "سيظهر في السجل."
+      "dropDescription": "سيظهر في السجل.",
+      "retranscribeError": "فشلت إعادة النسخ. يرجى المحاولة مرة أخرى.",
+      "original": "Original",
+      "postProcessed": "Post-processed",
+      "stats": {
+        "transcription": "Transcription: {{value}}",
+        "postProcess": "Post-process: {{value}}",
+        "tokens": "Tokens: {{count}}",
+        "milliseconds": "{{value}} ms",
+        "seconds": "{{value}} s",
+        "separator": " · "
+      }
     },
     "debug": {
       "title": "تصحيح الأخطاء",
@@ -749,7 +810,9 @@
       "whatsNewPreview": {
         "title": "معاينة الجديد",
         "description": "افتح أحدث ملاحظات إصدار مضمنة دون وضع علامة عليها كمقروءة",
-        "button": "معاينة"
+        "button": "معاينة",
+        "noNotes": "لم يتم العثور على ملاحظات إصدار مضمنة",
+        "error": "تعذرت معاينة ملاحظات الإصدار"
       },
       "onboardingPreview": {
         "title": "معاينة الإعداد الأولي",
@@ -763,7 +826,9 @@
           "demo": "عرض توضيحي",
           "try": "جرّبه",
           "done": "اكتمل الإعداد"
-        }
+        },
+        "permissionsButton": "الأذونات",
+        "modelsButton": "اختيار النموذج"
       },
       "onboardingRun": {
         "title": "تشغيل الإعداد الأولي",
@@ -866,6 +931,11 @@
         "verdictOk": "أحداث المفاتيح تصل إلى Handy بشكل طبيعي.",
         "verdictNoEvents": "لم يُسجَّل أي حدث — هل ضغطت أي مفاتيح أثناء الاختبار؟",
         "failed": "فشل التشخيص: {{error}}"
+      },
+      "paths": {
+        "appData": "بيانات التطبيق:",
+        "models": "النماذج:",
+        "settings": "الإعدادات:"
       }
     },
     "about": {
@@ -957,7 +1027,8 @@
     "open": "فتح",
     "copy": "نسخ",
     "clear": "مسح",
-    "noOptionsFound": "لم يتم العثور على خيارات"
+    "noOptionsFound": "لم يتم العثور على خيارات",
+    "back": "رجوع"
   },
   "errors": {
     "loadDirectory": "خطأ في تحميل المجلد: {{error}}",
@@ -987,7 +1058,9 @@
     "filePostProcessFailedTitle": "نُسخ بدون معالجة لاحقة",
     "filePostProcessFailed": "لم تكتمل المعالجة اللاحقة، لذا حُفظ النص المنسوخ كما هو.",
     "fileTranscriptionFailedTitle": "فشل التفريغ النصي للملف",
-    "transcriptionFailedTitle": "فشل التفريغ النصي"
+    "transcriptionFailedTitle": "فشل التفريغ النصي",
+    "recordingFailed": "فشل في بدء التسجيل: {{error}}",
+    "modelLoadFailedUnknown": "نموذج غير معروف"
   },
   "notices": {
     "errorOne": "{{n}} خطأ",
@@ -1024,5 +1097,9 @@
     "learnMore": "كيفية الإصلاح",
     "recorderBlocked": "لا يمكن تسجيل الاختصارات الآن — يحجب Secure Input في macOS أحداث المفاتيح. عالج تحذير Secure Input أولاً.",
     "dismiss": "تجاهل"
+  },
+  "accessibility": {
+    "permissionsDescription": ".يحتاج Handy إلى أذونات إمكانية الوصول لكتابة النص المفرغ",
+    "openSettings": "فتح إعدادات النظام"
   }
 }

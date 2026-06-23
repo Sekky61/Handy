@@ -19,7 +19,7 @@ use tauri_specta::Event;
 use crate::actions::process_transcription_output;
 use crate::audio_toolkit::{decode_audio_file, read_wav_samples, save_wav_file};
 use crate::language_detection::{LanguageDecision, LanguageSource};
-use crate::managers::history::{HistoryEntry, HistoryManager};
+use crate::managers::history::{HistoryEntry, HistoryEntryStats, HistoryManager};
 use crate::managers::transcription::{
     panic_payload_message, ChunkControl, Transcription, TranscriptionManager,
 };
@@ -317,6 +317,7 @@ impl TranscriptionJobManager {
             cancelled,
             percent: Cell::new(0),
         };
+        let transcription_time = std::time::Instant::now();
         let settings = get_settings(&self.app);
         let (text, language) = if settings.stt_backend == SttBackend::OpenRouter {
             let provider = settings
@@ -372,6 +373,7 @@ impl TranscriptionJobManager {
             };
             (text, language)
         };
+        let transcription_duration_ms = transcription_time.elapsed().as_millis() as i64;
         if text.is_empty() {
             return Err(anyhow!("Recording contains no speech"));
         }
@@ -395,6 +397,13 @@ impl TranscriptionJobManager {
             processed.post_processed_text,
             processed.post_process_prompt,
             language,
+            HistoryEntryStats {
+                transcription_duration_ms: Some(transcription_duration_ms),
+                post_process_duration_ms: processed.post_process_duration_ms,
+                post_process_prompt_tokens: processed.post_process_prompt_tokens,
+                post_process_completion_tokens: processed.post_process_completion_tokens,
+                post_process_total_tokens: processed.post_process_total_tokens,
+            },
         )?;
         Ok(JobEnd::Finished {
             post_process_failed,

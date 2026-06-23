@@ -974,6 +974,11 @@ mod tests {
             source_name: None,
             language: None,
             language_source: None,
+            transcription_duration_ms: None,
+            post_process_duration_ms: None,
+            post_process_prompt_tokens: None,
+            post_process_completion_tokens: None,
+            post_process_total_tokens: None,
         }
     }
 
