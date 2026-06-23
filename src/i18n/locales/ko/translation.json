@@ -19,7 +19,8 @@
     "postProcessing": "후처리",
     "history": "히스토리",
     "debug": "디버그",
-    "about": "정보"
+    "about": "정보",
+    "stt": "STT"
   },
   "onboarding": {
     "customModelDescription": "공식 지원되지 않음",
@@ -896,6 +897,34 @@
           "title": "ggml",
           "description": "OpenAI의 Whisper 자동 음성 인식 모델의 고성능 추론",
           "details": "Handy는 빠르고 로컬 음성-텍스트 처리를 위해 ggml를 사용합니다. Georgi Gerganov와 기여자들의 놀라운 작업에 감사드립니다."
+        }
+      }
+    },
+    "stt": {
+      "title": "Speech to Text",
+      "backend": {
+        "title": "Backend",
+        "description": "Choose whether Handy transcribes locally or sends recordings to OpenRouter STT.",
+        "local": "Local",
+        "openRouter": "OpenRouter"
+      },
+      "api": {
+        "title": "API",
+        "provider": {
+          "title": "Provider",
+          "description": "Select a speech-to-text provider. Only OpenRouter is available for now."
+        },
+        "apiKey": {
+          "title": "API Key",
+          "description": "OpenRouter API key used for remote transcription.",
+          "placeholder": "sk-or-..."
+        },
+        "model": {
+          "title": "Model",
+          "description": "Choose an OpenRouter transcription model.",
+          "placeholderWithOptions": "Search or select a model",
+          "placeholderNoOptions": "Type a model name",
+          "refreshModels": "Refresh models"
         }
       }
     }

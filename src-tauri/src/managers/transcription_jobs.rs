@@ -18,11 +18,13 @@ use tauri_specta::Event;
 
 use crate::actions::process_transcription_output;
 use crate::audio_toolkit::{decode_audio_file, read_wav_samples, save_wav_file};
+use crate::language_detection::{LanguageDecision, LanguageSource};
 use crate::managers::history::{HistoryEntry, HistoryManager};
 use crate::managers::transcription::{
     panic_payload_message, ChunkControl, Transcription, TranscriptionManager,
 };
 use crate::notices::{self, Notice, NoticeCode, NoticeSource};
+use crate::settings::{get_settings, SttBackend};
 
 /// How often a waiting chunk checks whether dictation has finished.
 const DICTATION_POLL: Duration = Duration::from_millis(200);
@@ -315,9 +317,60 @@ impl TranscriptionJobManager {
             cancelled,
             percent: Cell::new(0),
         };
-        let Some(Transcription { text, language }) = tm.transcribe_in_chunks(samples, &control)?
-        else {
-            return Ok(JobEnd::Cancelled);
+        let settings = get_settings(&self.app);
+        let (text, language) = if settings.stt_backend == SttBackend::OpenRouter {
+            let provider = settings
+                .active_stt_provider()
+                .cloned()
+                .ok_or_else(|| anyhow!("No STT provider is selected"))?;
+            let api_key = settings
+                .stt_api_keys
+                .get(&provider.id)
+                .cloned()
+                .unwrap_or_default();
+            let model = settings
+                .stt_models
+                .get(&provider.id)
+                .cloned()
+                .unwrap_or_default();
+            let selected_language = settings.selected_language.clone();
+            let result = tauri::async_runtime::block_on(async {
+                tokio::select! {
+                    result = crate::stt_client::transcribe_openrouter(
+                        &provider,
+                        api_key,
+                        &model,
+                        &samples,
+                        Some(selected_language.clone()),
+                    ) => result.map(Some),
+                    _ = async {
+                        while !cancelled.load(Ordering::Acquire) {
+                            tokio::time::sleep(DICTATION_POLL).await;
+                        }
+                    } => Ok(None),
+                }
+            })
+            .map_err(|error| anyhow!("{}", error))?;
+            let Some(text) = result else {
+                return Ok(JobEnd::Cancelled);
+            };
+            control.progress(samples.len(), samples.len());
+            let language = if selected_language.is_empty() || selected_language == "auto" {
+                None
+            } else {
+                Some(LanguageDecision {
+                    language: Some(selected_language),
+                    source: LanguageSource::Selected,
+                })
+            };
+            (text, language)
+        } else {
+            let Some(Transcription { text, language }) =
+                tm.transcribe_in_chunks(samples, &control)?
+            else {
+                return Ok(JobEnd::Cancelled);
+            };
+            (text, language)
         };
         if text.is_empty() {
             return Err(anyhow!("Recording contains no speech"));

@@ -2,6 +2,7 @@
 use crate::apple_intelligence;
 use crate::audio_feedback::{play_feedback_sound, play_feedback_sound_blocking, SoundType};
 use crate::audio_toolkit::VadPolicy;
+use crate::language_detection::{LanguageDecision, LanguageSource};
 use crate::managers::audio::{recording_notice_code, AudioRecordingManager};
 use crate::managers::history::HistoryManager;
 use crate::managers::model::ModelManager;
@@ -9,7 +10,9 @@ use crate::managers::transcription::policy::{live_decode, LiveDecode, ModelTrait
 use crate::managers::transcription::StreamWorkKind;
 use crate::managers::transcription::{Transcription, TranscriptionManager};
 use crate::notices::{self, Notice, NoticeCode, NoticeSource};
-use crate::settings::{get_settings, AppSettings, OverlayStyle, APPLE_INTELLIGENCE_PROVIDER_ID};
+use crate::settings::{
+    get_settings, AppSettings, OverlayStyle, SttBackend, APPLE_INTELLIGENCE_PROVIDER_ID,
+};
 use crate::shortcut;
 use crate::tray::{set_tray_state, TrayIconState};
 use crate::utils::{
@@ -522,11 +525,15 @@ impl ShortcutAction for TranscribeAction {
         let tm = app.state::<Arc<TranscriptionManager>>();
         let rm = app.state::<Arc<AudioRecordingManager>>();
 
-        // Load ASR model and VAD model in parallel
+        // Load ASR model and VAD model in parallel. Remote STT backends do not need
+        // the local ASR model, but VAD is still used for recording.
+        let settings = get_settings(app);
+        let uses_local_stt = settings.stt_backend == SttBackend::Local;
         let kickoff_started = Instant::now();
-        // An empty selection has nothing to load; the check below says so.
-        let selected_model = get_settings(app).selected_model;
-        let load_started = !selected_model.is_empty() && tm.initiate_model_load(true);
+        let selected_model = settings.selected_model.clone();
+        let load_started = uses_local_stt
+            && !selected_model.is_empty()
+            && tm.initiate_model_load(true);
         let rm_clone = Arc::clone(&rm);
         std::thread::spawn(move || {
             if let Err(e) = rm_clone.preload_vad() {
@@ -537,7 +544,7 @@ impl ShortcutAction for TranscribeAction {
 
         // Don't open the mic if nothing can transcribe the recording. A load
         // started above reports its own failure; one already running doesn't.
-        if !tm.is_model_loaded() {
+        if uses_local_stt && !tm.is_model_loaded() {
             if selected_model.is_empty() {
                 warn!("Not starting recording: no model is selected");
                 tm.raise_no_model_selected();
@@ -563,20 +570,23 @@ impl ShortcutAction for TranscribeAction {
 
         // Get the microphone mode to determine audio feedback timing
         let plan_started = Instant::now();
-        let settings = get_settings(app);
         let is_always_on = settings.always_on_microphone;
 
-        let selected_model_info = app
-            .state::<Arc<ModelManager>>()
-            .get_model_info(&settings.selected_model);
+        let selected_model_info = if uses_local_stt {
+            app.state::<Arc<ModelManager>>()
+                .get_model_info(&settings.selected_model)
+        } else {
+            None
+        };
 
         // Use the app-facing model capability as the single pre-recording source
         // for live streaming decisions. Unknown support is represented as false
         // until the model registry is updated by discovery or runtime load.
-        let model_supports_streaming = selected_model_info
-            .as_ref()
-            .map(|m| m.supports_streaming)
-            .unwrap_or(false);
+        let model_supports_streaming = uses_local_stt
+            && selected_model_info
+                .as_ref()
+                .map(|m| m.supports_streaming)
+                .unwrap_or(false);
         let vad_policy = if !settings.vad_enabled {
             VadPolicy::Disabled
         } else if model_supports_streaming {
@@ -787,7 +797,65 @@ impl ShortcutAction for TranscribeAction {
                     // otherwise a batch run of the samples. A cancel is surfaced
                     // as an error, so it never starts a batch run.
                     let transcription_time = Instant::now();
-                    let transcription_result = tm.transcribe_recording(samples);
+                    let settings = get_settings(&ah);
+                    let transcription_result = if settings.stt_backend == SttBackend::OpenRouter {
+                        let provider = settings
+                            .active_stt_provider()
+                            .cloned()
+                            .ok_or_else(|| "No STT provider is selected".to_string());
+
+                        match provider {
+                            Ok(provider) => {
+                                let api_key = settings
+                                    .stt_api_keys
+                                    .get(&provider.id)
+                                    .cloned()
+                                    .unwrap_or_default();
+                                let model = settings
+                                    .stt_models
+                                    .get(&provider.id)
+                                    .cloned()
+                                    .unwrap_or_default();
+                                let language = Some(settings.selected_language.clone());
+
+                                let Some(result) = complete_unless_cancelled(
+                                    crate::stt_client::transcribe_openrouter(
+                                        &provider,
+                                        api_key,
+                                        &model,
+                                        &samples,
+                                        language,
+                                    ),
+                                    || rm.was_cancelled_since(cancel_generation),
+                                )
+                                .await
+                                else {
+                                    debug!("Transcription operation cancelled during remote transcription");
+                                    utils::hide_recording_overlay(&ah);
+                                    set_tray_state(&ah, TrayIconState::Idle);
+                                    return;
+                                };
+
+                                result.map(|text| Transcription {
+                                    text,
+                                    language: if settings.selected_language.is_empty()
+                                        || settings.selected_language == "auto"
+                                    {
+                                        None
+                                    } else {
+                                        Some(LanguageDecision {
+                                            language: Some(settings.selected_language.clone()),
+                                            source: LanguageSource::Selected,
+                                        })
+                                    },
+                                })
+                            }
+                            Err(err) => Err(err),
+                        }
+                    } else {
+                        tm.transcribe_recording(samples)
+                            .map_err(|err| err.to_string())
+                    };
 
                     // Await WAV save and verify
                     let wav_saved = match wav_handle.await {

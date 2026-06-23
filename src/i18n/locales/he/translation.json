@@ -19,7 +19,8 @@
     "postProcessing": "עיבוד משלים",
     "history": "היסטוריה",
     "debug": "ניפוי שגיאות",
-    "about": "אודות"
+    "about": "אודות",
+    "stt": "STT"
   },
   "onboarding": {
     "customModelDescription": "לא נתמך באופן רשמי",
@@ -896,6 +897,34 @@
           "title": "ggml",
           "description": "הסקה מהירה לביצועים גבוהים עבור מודל זיהוי הדיבור Whisper של OpenAI",
           "details": "Handy משתמש ב-ggml לתמלול מהיר ומקומי. תודה לעבודה המדהימה של Georgi Gerganov וכל התורמים."
+        }
+      }
+    },
+    "stt": {
+      "title": "Speech to Text",
+      "backend": {
+        "title": "Backend",
+        "description": "Choose whether Handy transcribes locally or sends recordings to OpenRouter STT.",
+        "local": "Local",
+        "openRouter": "OpenRouter"
+      },
+      "api": {
+        "title": "API",
+        "provider": {
+          "title": "Provider",
+          "description": "Select a speech-to-text provider. Only OpenRouter is available for now."
+        },
+        "apiKey": {
+          "title": "API Key",
+          "description": "OpenRouter API key used for remote transcription.",
+          "placeholder": "sk-or-..."
+        },
+        "model": {
+          "title": "Model",
+          "description": "Choose an OpenRouter transcription model.",
+          "placeholderWithOptions": "Search or select a model",
+          "placeholderNoOptions": "Type a model name",
+          "refreshModels": "Refresh models"
         }
       }
     }
