@@ -14,7 +14,7 @@ use signal_hook::iterator::Signals;
 use std::thread;
 
 /// Send a transcription input to the coordinator.
-/// Used by signal handlers, CLI flags, and any other external trigger.
+/// Used by signal handlers and legacy external triggers.
 pub fn send_transcription_input(app: &AppHandle, binding_id: &str, source: &str) {
     if let Some(c) = app.try_state::<TranscriptionCoordinator>() {
         c.send_external_input(binding_id, source);
@@ -31,6 +31,31 @@ pub fn send_transcription_input(app: &AppHandle, binding_id: &str, source: &str)
 /// threads to suspend them, so handling it caused phantom recordings on every
 /// GC cycle (#1660). Linux users should use `handy --toggle-post-process`
 /// instead.
+
+pub fn start_recording(app: &AppHandle, post_process: bool, source: &str) {
+    if let Some(c) = app.try_state::<TranscriptionCoordinator>() {
+        c.start_recording(post_process, source);
+    } else {
+        warn!("TranscriptionCoordinator not initialized");
+    }
+}
+
+pub fn stop_recording(app: &AppHandle, source: &str) {
+    if let Some(c) = app.try_state::<TranscriptionCoordinator>() {
+        c.stop_recording(source);
+    } else {
+        warn!("TranscriptionCoordinator not initialized");
+    }
+}
+
+pub fn toggle_recording(app: &AppHandle, post_process: bool, source: &str) {
+    if let Some(c) = app.try_state::<TranscriptionCoordinator>() {
+        c.toggle_recording(post_process, source);
+    } else {
+        warn!("TranscriptionCoordinator not initialized");
+    }
+}
+
 #[cfg(unix)]
 pub fn setup_signal_handler(app_handle: AppHandle) {
     #[cfg(target_os = "macos")]
