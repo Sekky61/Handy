@@ -221,6 +221,7 @@
               cargo
               rust-analyzer
               clippy
+              rustfmt
               # Frontend
               nodejs
               bun
@@ -235,6 +236,7 @@
               GST_PLUGIN_SYSTEM_PATH_1_0;
 
             LD_LIBRARY_PATH = "${pkgs.lib.makeLibraryPath [ pkgs.libayatana-appindicator pkgs.vulkan-loader ]}";
+            RUST_SRC_PATH = "${pkgs.rustPlatform.rustLibSrc}";
 
             # Same as wrapGAppsHook4
             XDG_DATA_DIRS = "${pkgs.gsettings-desktop-schemas}/share/gsettings-schemas/${pkgs.gsettings-desktop-schemas.name}:${pkgs.gtk3}/share/gsettings-schemas/${pkgs.gtk3.name}:${pkgs.hicolor-icon-theme}/share";
