@@ -431,6 +431,10 @@
           "placeholderWithOptions": "모델 검색 또는 선택",
           "placeholderNoOptions": "모델 이름 입력",
           "refreshModels": "모델 새로고침"
+        },
+        "reasoning": {
+          "title": "Disable reasoning",
+          "description": "Ask OpenRouter to disable reasoning for post-processing. Turn this off when a preset requires reasoning."
         }
       },
       "prompts": {

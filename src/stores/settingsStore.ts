@@ -162,6 +162,8 @@ const settingUpdaters: {
   history_limit: (value) => commands.updateHistoryLimit(value as number),
   post_process_enabled: (value) =>
     commands.changePostProcessEnabledSetting(value as boolean),
+  post_process_disable_reasoning: (value) =>
+    commands.changePostProcessDisableReasoningSetting(value as boolean),
   stt_backend: (value) => commands.changeSttBackendSetting(value as string),
   post_process_selected_prompt_id: (value) =>
     commands.setPostProcessSelectedPrompt(value as string),

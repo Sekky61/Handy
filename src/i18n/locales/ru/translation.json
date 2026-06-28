@@ -431,6 +431,10 @@
           "placeholderWithOptions": "Найдите или выберите модель",
           "placeholderNoOptions": "Введите название модели",
           "refreshModels": "Обновить модели"
+        },
+        "reasoning": {
+          "title": "Disable reasoning",
+          "description": "Ask OpenRouter to disable reasoning for post-processing. Turn this off when a preset requires reasoning."
         }
       },
       "prompts": {

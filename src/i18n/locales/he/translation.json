@@ -431,6 +431,10 @@
           "placeholderWithOptions": "חפש או בחר מודל",
           "placeholderNoOptions": "הקלד שם מודל",
           "refreshModels": "רענן מודלים"
+        },
+        "reasoning": {
+          "title": "Disable reasoning",
+          "description": "Ask OpenRouter to disable reasoning for post-processing. Turn this off when a preset requires reasoning."
         }
       },
       "prompts": {

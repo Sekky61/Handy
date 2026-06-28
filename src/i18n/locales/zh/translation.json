@@ -431,6 +431,10 @@
           "placeholderWithOptions": "搜索或选择模型",
           "placeholderNoOptions": "输入模型名称",
           "refreshModels": "刷新模型"
+        },
+        "reasoning": {
+          "title": "Disable reasoning",
+          "description": "Ask OpenRouter to disable reasoning for post-processing. Turn this off when a preset requires reasoning."
         }
       },
       "prompts": {

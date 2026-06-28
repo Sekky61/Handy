@@ -215,10 +215,10 @@ async fn post_process_transcription(
         .cloned()
         .unwrap_or_default();
 
-    // Ask these providers to skip reasoning/thinking — post-processing rarely
-    // benefits from it and it adds seconds of latency. llm_client picks the
-    // field the endpoint understands and retries without it if rejected.
-    let disable_reasoning = matches!(provider.id.as_str(), "custom" | "openrouter");
+    // The setting controls the existing provider-aware reasoning suppression.
+    // llm_client chooses the compatible field and retries without it if rejected.
+    let disable_reasoning = settings.post_process_disable_reasoning
+        && matches!(provider.id.as_str(), "custom" | "openrouter");
 
     if provider.supports_structured_output {
         debug!("Using structured outputs for provider '{}'", provider.id);

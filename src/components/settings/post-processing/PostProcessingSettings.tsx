@@ -9,6 +9,7 @@ import {
   SettingContainer,
   SettingsGroup,
   Textarea,
+  ToggleSwitch,
 } from "@/components/ui";
 import { Button } from "../../ui/Button";
 import { ResetButton } from "../../ui/ResetButton";
@@ -25,6 +26,7 @@ import { useSettings } from "../../../hooks/useSettings";
 const PostProcessingSettingsApiComponent: React.FC = () => {
   const { t } = useTranslation();
   const state = usePostProcessProviderState();
+  const { settings, updateSetting, isUpdating } = useSettings();
 
   return (
     <>
@@ -138,6 +140,20 @@ const PostProcessingSettingsApiComponent: React.FC = () => {
             </ResetButton>
           </div>
         </SettingContainer>
+      )}
+
+      {state.selectedProvider?.id === "openrouter" && (
+        <ToggleSwitch
+          checked={settings?.post_process_disable_reasoning ?? true}
+          onChange={(enabled) =>
+            updateSetting("post_process_disable_reasoning", enabled)
+          }
+          isUpdating={isUpdating("post_process_disable_reasoning")}
+          label={t("settings.postProcessing.api.reasoning.title")}
+          description={t("settings.postProcessing.api.reasoning.description")}
+          descriptionMode="tooltip"
+          grouped={true}
+        />
       )}
     </>
   );

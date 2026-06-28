@@ -431,6 +431,10 @@
           "placeholderWithOptions": "Rechercher ou sélectionner un modèle",
           "placeholderNoOptions": "Tapez un nom de modèle",
           "refreshModels": "Actualiser les modèles"
+        },
+        "reasoning": {
+          "title": "Disable reasoning",
+          "description": "Ask OpenRouter to disable reasoning for post-processing. Turn this off when a preset requires reasoning."
         }
       },
       "prompts": {
