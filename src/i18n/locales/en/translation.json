@@ -507,6 +507,7 @@
         "transcription": "Transcription: {{value}}",
         "postProcess": "Post-process: {{value}}",
         "tokens": "Tokens: {{count}}",
+        "tokensWithBreakdown": "Tokens: {{count}} (in {{input}}, out {{output}})",
         "milliseconds": "{{value}} ms",
         "seconds": "{{value}} s",
         "separator": " · "

@@ -387,9 +387,17 @@ const HistoryEntryComponent: React.FC<HistoryEntryProps> = ({
           value: formatDuration(entry.post_process_duration_ms),
         })
       : null,
-    tokenCount !== null
-      ? t("settings.history.stats.tokens", { count: tokenCount })
-      : null,
+    tokenCount !== null &&
+    entry.post_process_prompt_tokens !== null &&
+    entry.post_process_completion_tokens !== null
+      ? t("settings.history.stats.tokensWithBreakdown", {
+          count: tokenCount,
+          input: entry.post_process_prompt_tokens,
+          output: entry.post_process_completion_tokens,
+        })
+      : tokenCount !== null
+        ? t("settings.history.stats.tokens", { count: tokenCount })
+        : null,
   ].filter((value): value is string => value !== null);
 
   return (
