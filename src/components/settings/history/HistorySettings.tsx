@@ -14,6 +14,7 @@ import { useOsType } from "@/hooks/useOsType";
 import { formatDateTime } from "@/utils/dateFormat";
 import { AudioPlayer, AudioPlayerGroup } from "../../ui/AudioPlayer";
 import { Button } from "../../ui/Button";
+import { buildTextDiff, DiffText } from "./HistoryTextDiff";
 
 const IconButton: React.FC<{
   onClick: () => void;
@@ -323,6 +324,13 @@ const HistoryEntryComponent: React.FC<HistoryEntryProps> = ({
   const hasPostProcessedText =
     entry.post_processed_text !== null &&
     entry.post_processed_text.trim().length > 0;
+  const diff = React.useMemo(
+    () =>
+      hasPostProcessedText && entry.post_processed_text !== null
+        ? buildTextDiff(entry.transcription_text, entry.post_processed_text)
+        : null,
+    [entry.post_processed_text, entry.transcription_text, hasPostProcessedText],
+  );
   const tokenCount =
     entry.post_process_total_tokens ??
     (entry.post_process_prompt_tokens !== null &&
@@ -490,7 +498,11 @@ const HistoryEntryComponent: React.FC<HistoryEntryProps> = ({
                 </p>
               )}
               <p className="italic text-sm text-text/90 whitespace-pre-wrap break-words">
-                {entry.transcription_text}
+                {diff ? (
+                  <DiffText segments={diff.original} variant="original" />
+                ) : (
+                  entry.transcription_text
+                )}
               </p>
             </div>
 
@@ -500,7 +512,10 @@ const HistoryEntryComponent: React.FC<HistoryEntryProps> = ({
                   {t("settings.history.postProcessed")}
                 </p>
                 <p className="italic text-sm text-text/90 whitespace-pre-wrap break-words">
-                  {entry.post_processed_text}
+                  <DiffText
+                    segments={diff?.processed ?? []}
+                    variant="processed"
+                  />
                 </p>
               </div>
             )}
