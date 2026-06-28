@@ -40,6 +40,7 @@ import {
   useFileReadsStore,
   type FileRead,
 } from "./transcribeFiles";
+import { buildTextDiff, DiffText } from "./HistoryTextDiff";
 
 const IconButton: React.FC<{
   onClick: () => void;
@@ -415,6 +416,16 @@ const HistoryEntryComponent: React.FC<HistoryEntryProps> = ({
     if (!retrying) setCancelling(false);
   }, [retrying]);
   const hasTranscription = entry.transcription_text.trim().length > 0;
+  const hasPostProcessedText =
+    entry.post_processed_text !== null &&
+    entry.post_processed_text.trim().length > 0;
+  const diff = React.useMemo(
+    () =>
+      hasPostProcessedText && entry.post_processed_text !== null
+        ? buildTextDiff(entry.transcription_text, entry.post_processed_text)
+        : null,
+    [entry.post_processed_text, entry.transcription_text, hasPostProcessedText],
+  );
   const tokenCount =
     entry.post_process_total_tokens ??
     (entry.post_process_prompt_tokens !== null &&
@@ -574,38 +585,62 @@ const HistoryEntryComponent: React.FC<HistoryEntryProps> = ({
       </div>
 
       <div className="flex flex-col items-start gap-1 pb-2">
-        <p
-          ref={textRef}
-          className={`italic text-sm w-full ${
-            retrying
-              ? ""
-              : hasTranscription
-                ? "text-text select-text cursor-text whitespace-pre-wrap break-words"
-                : "text-ink-3"
-          }`}
-          style={
-            retrying
-              ? TRANSCRIBE_PULSE
-              : folded
-                ? {
-                    display: "-webkit-box",
-                    WebkitLineClamp: FOLDED_LINES,
-                    WebkitBoxOrient: "vertical",
-                    overflow: "hidden",
-                  }
-                : undefined
-          }
-        >
-          {retrying && <TranscribePulseKeyframes />}
-          {retrying
-            ? progressText
-            : hasTranscription
-              ? entry.transcription_text
-              : entry.source_name
-                ? // Cancelled, interrupted by a quit, or failed.
-                  t("settings.history.notTranscribed")
-                : t("settings.history.transcriptionFailed")}
-        </p>
+        {retrying ? (
+          <p className="italic text-sm" style={TRANSCRIBE_PULSE}>
+            <TranscribePulseKeyframes />
+            {progressText}
+          </p>
+        ) : hasTranscription ? (
+          <div className="w-full space-y-2">
+            <div>
+              {hasPostProcessedText && (
+                <p className="text-[11px] font-medium uppercase text-ink-3">
+                  {t("settings.history.original")}
+                </p>
+              )}
+              <p
+                ref={textRef}
+                className="italic text-sm w-full text-text select-text cursor-text whitespace-pre-wrap break-words"
+                style={
+                  folded
+                    ? {
+                        display: "-webkit-box",
+                        WebkitLineClamp: FOLDED_LINES,
+                        WebkitBoxOrient: "vertical",
+                        overflow: "hidden",
+                      }
+                    : undefined
+                }
+              >
+                {diff ? (
+                  <DiffText segments={diff.original} variant="original" />
+                ) : (
+                  entry.transcription_text
+                )}
+              </p>
+            </div>
+
+            {hasPostProcessedText && (
+              <div>
+                <p className="text-[11px] font-medium uppercase text-ink-3">
+                  {t("settings.history.postProcessed")}
+                </p>
+                <p className="italic text-sm w-full text-text select-text cursor-text whitespace-pre-wrap break-words">
+                  <DiffText
+                    segments={diff?.processed ?? []}
+                    variant="processed"
+                  />
+                </p>
+              </div>
+            )}
+          </div>
+        ) : (
+          <p className="italic text-sm text-ink-3">
+            {entry.source_name
+              ? t("settings.history.notTranscribed")
+              : t("settings.history.transcriptionFailed")}
+          </p>
+        )}
         {hasTranscription && !retrying && stats.length > 0 && (
           <p className="text-xs text-ink-3">
             {stats.join(t("settings.history.stats.separator"))}
