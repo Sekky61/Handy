@@ -21,6 +21,16 @@ This checkout is maintained through the `fork` branch on the personal fork:
 
 **Core Development:**
 
+This repository provides the complete development toolchain through Nix. Run
+Rust, Bun, formatting, linting, and test commands inside `nix develop`; do not
+rely on host-installed tools or libraries. Cargo commands must run from
+`src-tauri`, where the manifest is located. For example:
+
+```bash
+nix develop --command bash -lc 'cd src-tauri && cargo fmt --all -- --check'
+nix develop --command bash -lc 'cd src-tauri && cargo test'
+```
+
 ```bash
 # Install dependencies
 bun install
