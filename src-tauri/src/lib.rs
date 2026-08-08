@@ -1030,10 +1030,19 @@ pub fn run(cli_args: CliArgs) {
             // When no GUI instance existed, the internal child launched by the
             // blocking client becomes the primary instance. Start its original
             // request here; otherwise the single-instance callback handles it.
+            // The hidden child has no frontend to call initialize_shortcuts(),
+            // so initialize them explicitly or the recording can never be
+            // stopped by the user's configured shortcut.
             if cli_args.wait {
                 if let (Some(endpoint), Some(token)) =
                     (cli_args.wait_endpoint.clone(), cli_args.wait_token.clone())
                 {
+                    if let Err(error) = commands::initialize_shortcuts(app_handle.clone()) {
+                        wait_ipc::WaitResponder::new(endpoint, token)
+                            .send_error(&format!("Failed to initialize shortcuts: {error}"));
+                        app_handle.exit(1);
+                        return Ok(());
+                    }
                     app_handle
                         .state::<TranscriptionCoordinator>()
                         .start_recording_wait(
