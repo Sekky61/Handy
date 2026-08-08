@@ -1,6 +1,7 @@
 use crate::actions::ACTION_MAP;
 use crate::managers::audio::AudioRecordingManager;
 use crate::settings::ShortcutActivation;
+use crate::wait_ipc::{WaitResponder, WaitResponseState};
 use log::{debug, error, warn};
 use std::sync::mpsc::{self, Sender};
 use std::sync::Arc;
@@ -85,6 +86,7 @@ enum Command {
     StartRecording {
         post_process: bool,
         source: String,
+        wait_responder: Option<WaitResponder>,
     },
     StopRecording {
         source: String,
@@ -185,13 +187,6 @@ enum Effect {
         binding_id: String,
         hotkey_string: String,
     },
-}
-
-/// Commands processed sequentially by the coordinator thread.
-enum Command {
-    Input(InputEvent),
-    Cancel { recording_was_active: bool },
-    ProcessingFinished,
 }
 
 /// Decide whether a key-up should be deferred (so auto-repeat can cancel it)
@@ -594,17 +589,41 @@ impl TranscriptionCoordinator {
                         Command::StartRecording {
                             post_process,
                             source,
+                            wait_responder,
                         } => {
                             if matches!(&state.stage, Stage::Idle) {
+                                if let Some(responder) = wait_responder {
+                                    let wait_state = app.state::<WaitResponseState>();
+                                    if let Err(error) = wait_state.register(responder) {
+                                        warn!("Rejecting --wait recording: {error}");
+                                        continue;
+                                    }
+                                }
                                 let binding_id = binding_id_for_post_process(post_process);
-                                let effect = state.begin_recording(binding_id.to_string(), source);
+                                let effect = state.begin_recording(
+                                    binding_id.to_string(),
+                                    source,
+                                    Instant::now(),
+                                    true,
+                                );
                                 run_effect(&app, &mut state, effect);
+                                if matches!(&state.stage, Stage::Idle) {
+                                    app.state::<WaitResponseState>().complete(Err(
+                                        "recording could not be started".to_string(),
+                                    ));
+                                }
                             } else if matches!(&state.stage, Stage::Recording(_)) {
                                 debug!(
                                     "Ignoring start recording from '{source}': already recording"
                                 );
+                                if let Some(responder) = wait_responder {
+                                    responder.send_error("Handy is already recording");
+                                }
                             } else {
                                 debug!("Ignoring start recording from '{source}': pipeline busy");
+                                if let Some(responder) = wait_responder {
+                                    responder.send_error("Handy is processing another recording");
+                                }
                             }
                         }
                         Command::StopRecording { source } => {
@@ -624,7 +643,12 @@ impl TranscriptionCoordinator {
                         } => {
                             if matches!(&state.stage, Stage::Idle) {
                                 let binding_id = binding_id_for_post_process(post_process);
-                                let effect = state.begin_recording(binding_id.to_string(), source);
+                                let effect = state.begin_recording(
+                                    binding_id.to_string(),
+                                    source,
+                                    Instant::now(),
+                                    true,
+                                );
                                 run_effect(&app, &mut state, effect);
                             } else if let Stage::Recording(binding_id) = &state.stage {
                                 let binding_id = binding_id.clone();
@@ -718,9 +742,32 @@ impl TranscriptionCoordinator {
             .send(Command::StartRecording {
                 post_process,
                 source: source.to_string(),
+                wait_responder: None,
             })
             .is_err()
         {
+            warn!("Transcription coordinator channel closed");
+        }
+    }
+
+    pub(crate) fn start_recording_wait(
+        &self,
+        post_process: bool,
+        source: &str,
+        wait_responder: WaitResponder,
+    ) {
+        if let Err(error) = self.tx.send(Command::StartRecording {
+            post_process,
+            source: source.to_string(),
+            wait_responder: Some(wait_responder),
+        }) {
+            if let Command::StartRecording {
+                wait_responder: Some(responder),
+                ..
+            } = error.0
+            {
+                responder.send_error("Handy's recording coordinator is unavailable");
+            }
             warn!("Transcription coordinator channel closed");
         }
     }
