@@ -18,6 +18,7 @@ use crate::tray::{set_tray_state, TrayIconState};
 use crate::utils::{
     self, show_processing_overlay, show_recording_overlay, show_transcribing_overlay,
 };
+use crate::wait_ipc::WaitResponseState;
 use crate::TranscriptionCoordinator;
 use log::{debug, error, warn};
 use once_cell::sync::Lazy;
@@ -839,6 +840,7 @@ impl ShortcutAction for TranscribeAction {
 
                 if samples.is_empty() {
                     debug!("Recording produced no audio samples; skipping persistence");
+                    ah.state::<WaitResponseState>().complete(Ok(String::new()));
                     // Tear down any streaming worker so its channel doesn't leak
                     // and block the next start_stream.
                     tm.cancel_stream();
@@ -1028,8 +1030,17 @@ impl ShortcutAction for TranscribeAction {
                             };
 
                             if final_text.is_empty() {
+                                ah.state::<WaitResponseState>().complete(Ok(String::new()));
                                 finish_without_text(&ah, input_silent, sample_count, stop_time);
                             } else {
+                                if ah
+                                    .state::<WaitResponseState>()
+                                    .complete(Ok(final_text.clone()))
+                                {
+                                    utils::hide_recording_overlay(&ah);
+                                    set_tray_state(&ah, TrayIconState::Idle);
+                                    return;
+                                }
                                 let ah_clone = ah.clone();
                                 let paste_time = Instant::now();
                                 let post_process_failed = processed.post_process_failed;
@@ -1142,6 +1153,8 @@ impl ShortcutAction for TranscribeAction {
                             }
 
                             error!("Transcription failed: {}", err);
+                            ah.state::<WaitResponseState>()
+                                .complete(Err(err.to_string()));
                             notices::raise(
                                 &ah,
                                 Notice::new(
@@ -1186,6 +1199,7 @@ impl ShortcutAction for TranscribeAction {
                 utils::hide_recording_overlay(&ah);
                 set_tray_state(&ah, TrayIconState::Idle);
                 if !rm.was_cancelled_since(cancel_generation) {
+                    ah.state::<WaitResponseState>().complete(Ok(String::new()));
                     emit_transcription_complete(&ah, TranscriptionOutcome::Empty, 0, stop_time);
                 }
             }

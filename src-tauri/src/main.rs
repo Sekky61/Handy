@@ -5,10 +5,14 @@ use clap::Parser;
 use handy_app_lib::CliArgs;
 
 fn main() {
-    // Let users pick GTK's display backend even inside the AppImage, whose
-    // launch hook forces GDK_BACKEND=x11 over the user's own value (#1729,
-    // #2034; hook workaround for tauri-apps/tauri#8541). Runs first so GTK
-    // never sees the forced value.
+    let cli_args = CliArgs::parse();
+
+    // A waiting invocation remains the user-facing process. It launches a
+    // regular secondary Handy instance carrying a private response endpoint;
+    // the single-instance plugin forwards that request to the GUI instance.
+    if cli_args.wait && cli_args.wait_endpoint.is_none() {
+        std::process::exit(handy_app_lib::run_wait_client(&cli_args));
+    }
     #[cfg(target_os = "linux")]
     handy_app_lib::apply_handy_gdk_backend();
 
@@ -35,6 +39,5 @@ fn main() {
         std::process::exit(handy_app_lib::engine_supervisor::run_worker());
     }
 
-    let cli_args = CliArgs::parse();
     handy_app_lib::run(cli_args)
 }
