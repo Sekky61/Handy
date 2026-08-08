@@ -43,6 +43,11 @@ impl WaitResponder {
                 Ok(payload) => {
                     if let Err(error) = stream.write_all(&payload) {
                         log::error!("Failed to send --wait response: {error}");
+                    } else if let Err(error) = stream.shutdown(std::net::Shutdown::Write) {
+                        // The client reads the response until EOF. Explicitly
+                        // half-close the connection so it cannot remain blocked
+                        // if this stream is kept alive by a future refactor.
+                        log::error!("Failed to close --wait response: {error}");
                     }
                 }
                 Err(error) => log::error!("Failed to serialize --wait response: {error}"),
