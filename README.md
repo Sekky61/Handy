@@ -87,8 +87,25 @@ Handy supports command-line flags for controlling a running instance and customi
 ```bash
 handy --toggle-transcription    # Toggle recording on/off
 handy --toggle-post-process     # Toggle recording with post-processing on/off
+handy --start-recording         # Start recording if idle
+handy --stop-recording          # Stop the active recording
 handy --cancel                  # Cancel the current operation
 ```
+
+For scripting, `--wait` keeps the caller attached until that recording is
+stopped and transcribed. The final text is written to stdout instead of being
+pasted into the focused application:
+
+```bash
+note=$(handy --start-recording --wait) # Speak, then use the Handy stop shortcut
+printf '%s\n' "$note"
+
+# Machine-readable output: {"text":"..."}
+handy --start-recording --wait --json
+```
+
+`--wait` is valid only with `--start-recording`; `--post-process` may also be
+used to return the configured post-processed result.
 
 **Startup flags:**
 

@@ -1,5 +1,6 @@
 use crate::actions::ACTION_MAP;
 use crate::managers::audio::AudioRecordingManager;
+use crate::wait_ipc::{WaitResponder, WaitResponseState};
 use log::{debug, error, warn};
 use std::sync::mpsc::{self, Sender};
 use std::sync::Arc;
@@ -30,6 +31,18 @@ enum Command {
         hotkey_string: String,
         is_pressed: bool,
         push_to_talk: bool,
+    },
+    StartRecording {
+        post_process: bool,
+        source: String,
+        wait_responder: Option<WaitResponder>,
+    },
+    StopRecording {
+        source: String,
+    },
+    ToggleRecording {
+        post_process: bool,
+        source: String,
     },
     Cancel {
         recording_was_active: bool,
@@ -188,13 +201,71 @@ impl TranscriptionCoordinator {
                                 }
                             }
                         }
+                        Command::StartRecording {
+                            post_process,
+                            source,
+                            wait_responder,
+                        } => {
+                            if matches!(&stage, Stage::Idle) {
+                                if let Some(responder) = wait_responder {
+                                    let wait_state = app.state::<WaitResponseState>();
+                                    if let Err(error) = wait_state.register(responder) {
+                                        warn!("Rejecting --wait recording: {error}");
+                                        continue;
+                                    }
+                                }
+                                let binding_id = binding_id_for_post_process(post_process);
+                                start(&app, &mut stage, binding_id, &source);
+                                if matches!(&stage, Stage::Idle) {
+                                    app.state::<WaitResponseState>().complete(Err(
+                                        "recording could not be started".to_string(),
+                                    ));
+                                }
+                            } else if matches!(&stage, Stage::Recording(_)) {
+                                debug!(
+                                    "Ignoring start recording from '{source}': already recording"
+                                );
+                                if let Some(responder) = wait_responder {
+                                    responder.send_error("Handy is already recording");
+                                }
+                            } else {
+                                debug!("Ignoring start recording from '{source}': pipeline busy");
+                                if let Some(responder) = wait_responder {
+                                    responder.send_error("Handy is processing another recording");
+                                }
+                            }
+                        }
+                        Command::StopRecording { source } => {
+                            if let Stage::Recording(binding_id) = &stage {
+                                let binding_id = binding_id.clone();
+                                stop(&app, &mut stage, &binding_id, &source);
+                            } else if matches!(&stage, Stage::Idle) {
+                                debug!("Ignoring stop recording from '{source}': idle");
+                            } else {
+                                debug!("Ignoring stop recording from '{source}': pipeline busy");
+                            }
+                        }
+                        Command::ToggleRecording {
+                            post_process,
+                            source,
+                        } => {
+                            if matches!(&stage, Stage::Idle) {
+                                let binding_id = binding_id_for_post_process(post_process);
+                                start(&app, &mut stage, binding_id, &source);
+                            } else if let Stage::Recording(binding_id) = &stage {
+                                let binding_id = binding_id.clone();
+                                stop(&app, &mut stage, &binding_id, &source);
+                            } else {
+                                debug!("Ignoring toggle recording from '{source}': pipeline busy");
+                            }
+                        }
                         Command::Cancel {
                             recording_was_active,
                         } => {
                             pending_release = None;
                             // Don't reset during processing — wait for the pipeline to finish.
-                            if !matches!(stage, Stage::Processing)
-                                && (recording_was_active || matches!(stage, Stage::Recording(_)))
+                            if !matches!(&stage, Stage::Processing)
+                                && (recording_was_active || matches!(&stage, Stage::Recording(_)))
                             {
                                 stage = Stage::Idle;
                             }
@@ -237,6 +308,67 @@ impl TranscriptionCoordinator {
         }
     }
 
+    pub fn start_recording(&self, post_process: bool, source: &str) {
+        if self
+            .tx
+            .send(Command::StartRecording {
+                post_process,
+                source: source.to_string(),
+                wait_responder: None,
+            })
+            .is_err()
+        {
+            warn!("Transcription coordinator channel closed");
+        }
+    }
+
+    pub(crate) fn start_recording_wait(
+        &self,
+        post_process: bool,
+        source: &str,
+        wait_responder: WaitResponder,
+    ) {
+        if let Err(error) = self.tx.send(Command::StartRecording {
+            post_process,
+            source: source.to_string(),
+            wait_responder: Some(wait_responder),
+        }) {
+            if let Command::StartRecording {
+                wait_responder: Some(responder),
+                ..
+            } = error.0
+            {
+                responder.send_error("Handy's recording coordinator is unavailable");
+            }
+            warn!("Transcription coordinator channel closed");
+        }
+    }
+
+    pub fn stop_recording(&self, source: &str) {
+        if self
+            .tx
+            .send(Command::StopRecording {
+                source: source.to_string(),
+            })
+            .is_err()
+        {
+            warn!("Transcription coordinator channel closed");
+        }
+    }
+
+    pub fn toggle_recording(&self, post_process: bool, source: &str) {
+        if self
+            .tx
+            .send(Command::ToggleRecording {
+                post_process,
+                source: source.to_string(),
+            })
+            .is_err()
+        {
+            warn!("Transcription coordinator channel closed");
+        }
+    }
+
     pub fn notify_cancel(&self, recording_was_active: bool) {
         if self
             .tx
@@ -253,6 +385,14 @@ impl TranscriptionCoordinator {
         if self.tx.send(Command::ProcessingFinished).is_err() {
             warn!("Transcription coordinator channel closed");
         }
+    }
+}
+
+fn binding_id_for_post_process(post_process: bool) -> &'static str {
+    if post_process {
+        "transcribe_with_post_process"
+    } else {
+        "transcribe"
     }
 }
 

@@ -12,6 +12,7 @@ mod helpers;
 mod input;
 mod llm_client;
 mod managers;
+mod memory;
 mod overlay;
 mod paste_tx;
 pub mod portable;
@@ -19,10 +20,13 @@ mod secure_input;
 mod settings;
 mod shortcut;
 mod signal_handle;
+mod stt_client;
+mod stt_settings;
 mod transcription_coordinator;
 mod tray;
 mod tray_i18n;
 mod utils;
+mod wait_ipc;
 
 pub use cli::CliArgs;
 #[cfg(debug_assertions)]
@@ -45,6 +49,11 @@ use tauri_plugin_autostart::MacosLauncher;
 use tauri_plugin_log::{Builder as LogBuilder, RotationStrategy, Target, TargetKind};
 
 use crate::settings::get_settings;
+
+/// Run the blocking side of `--start-recording --wait` before Tauri starts.
+pub fn run_wait_client(args: &CliArgs) -> i32 {
+    wait_ipc::run_client(args)
+}
 
 // Global atomic to store the file log level filter
 // We use u8 to store the log::LevelFilter as a number
@@ -90,6 +99,47 @@ fn build_console_filter() -> env_filter::Filter {
     }
 
     builder.build()
+}
+
+fn cli_arg_present(args: &[String], flag: &str) -> bool {
+    args.iter().any(|arg| arg == flag)
+}
+
+fn handle_single_instance_cli_args(app: &AppHandle, args: &[String]) {
+    if let Ok(parsed) = <CliArgs as clap::Parser>::try_parse_from(args) {
+        if parsed.wait {
+            match (parsed.wait_endpoint, parsed.wait_token) {
+                (Some(endpoint), Some(token)) => {
+                    let responder = wait_ipc::WaitResponder::new(endpoint, token);
+                    if let Some(c) = app.try_state::<TranscriptionCoordinator>() {
+                        c.start_recording_wait(parsed.post_process, "CLI --wait", responder);
+                    } else {
+                        responder.send_error("Handy is not ready to start recording");
+                    }
+                }
+                _ => log::warn!("Ignoring malformed --wait request"),
+            }
+            return;
+        }
+    }
+
+    let post_process = cli_arg_present(args, "--post-process");
+
+    if cli_arg_present(args, "--cancel") {
+        crate::utils::cancel_current_operation(app);
+    } else if cli_arg_present(args, "--stop-recording") {
+        signal_handle::stop_recording(app, "CLI");
+    } else if cli_arg_present(args, "--start-recording") {
+        signal_handle::start_recording(app, post_process, "CLI");
+    } else if cli_arg_present(args, "--toggle-recording") {
+        signal_handle::toggle_recording(app, post_process, "CLI");
+    } else if cli_arg_present(args, "--toggle-post-process") {
+        signal_handle::toggle_recording(app, true, "CLI");
+    } else if cli_arg_present(args, "--toggle-transcription") {
+        signal_handle::toggle_recording(app, false, "CLI");
+    } else {
+        show_main_window(app);
+    }
 }
 
 fn show_main_window(app: &AppHandle) {
@@ -587,6 +637,11 @@ fn run_headless_transcription(app: &AppHandle, args: &CliArgs) -> i32 {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run(cli_args: CliArgs) {
+    // Pin glibc's dynamic mmap threshold before the first large allocation,
+    // so per-dictation transient buffers are returned to the OS on free
+    // instead of accumulating in malloc arenas (#1792). No-op off Linux/glibc.
+    memory::init_allocator();
+
     // Detect portable mode before anything else
     portable::init();
 
@@ -623,12 +678,18 @@ pub fn run(cli_args: CliArgs) {
             shortcut::change_auto_submit_setting,
             shortcut::change_auto_submit_key_setting,
             shortcut::change_post_process_enabled_setting,
+            shortcut::change_post_process_disable_reasoning_setting,
             shortcut::change_experimental_enabled_setting,
             shortcut::change_post_process_base_url_setting,
             shortcut::change_post_process_api_key_setting,
             shortcut::change_post_process_model_setting,
             shortcut::set_post_process_provider,
             shortcut::fetch_post_process_models,
+            commands::stt::change_stt_backend_setting,
+            commands::stt::set_stt_provider,
+            commands::stt::change_stt_api_key_setting,
+            commands::stt::change_stt_model_setting,
+            commands::stt::fetch_stt_models,
             shortcut::add_post_process_prompt,
             shortcut::update_post_process_prompt,
             shortcut::delete_post_process_prompt,
@@ -695,6 +756,8 @@ pub fn run(cli_args: CliArgs) {
             commands::audio::set_clamshell_microphone,
             commands::audio::get_clamshell_microphone,
             commands::audio::is_recording,
+            commands::audio::get_microphone_channels,
+            commands::audio::set_selected_channel,
             commands::transcription::set_model_unload_timeout,
             commands::transcription::get_model_load_status,
             commands::transcription::unload_model_manually,
@@ -727,6 +790,7 @@ pub fn run(cli_args: CliArgs) {
     // note below), not forward to an already-running app.
     let headless_mode =
         cli_args.transcribe_file.is_some() || cli_args.list_devices || cli_args.list_models;
+    let machine_output = headless_mode || cli_args.wait;
 
     #[allow(unused_mut)]
     let mut builder = tauri::Builder::default()
@@ -740,10 +804,9 @@ pub fn run(cli_args: CliArgs) {
                 .clear_targets()
                 .targets([
                     // Console output respects RUST_LOG environment variable. In
-                    // headless mode (--transcribe-file/--list-devices/--list-models)
-                    // stdout carries only the result (JSON or plain), so send console
-                    // logs to stderr instead to keep stdout clean for CI parsing.
-                    Target::new(if headless_mode {
+                    // In machine-output modes stdout carries only the result
+                    // (JSON or plain), so send console logs to stderr.
+                    Target::new(if machine_output {
                         TargetKind::Stderr
                     } else {
                         TargetKind::Stdout
@@ -792,15 +855,7 @@ pub fn run(cli_args: CliArgs) {
     // instance instead.
     if !headless_mode {
         builder = builder.plugin(tauri_plugin_single_instance::init(|app, args, _cwd| {
-            if args.iter().any(|a| a == "--toggle-transcription") {
-                signal_handle::send_transcription_input(app, "transcribe", "CLI");
-            } else if args.iter().any(|a| a == "--toggle-post-process") {
-                signal_handle::send_transcription_input(app, "transcribe_with_post_process", "CLI");
-            } else if args.iter().any(|a| a == "--cancel") {
-                crate::utils::cancel_current_operation(app);
-            } else {
-                show_main_window(app);
-            }
+            handle_single_instance_cli_args(app, &args);
         }));
     }
 
@@ -904,10 +959,37 @@ pub fn run(cli_args: CliArgs) {
             // viewer is the sole consumer and only exists in debug mode). This also
             // honors the runtime `--debug` override applied to `settings` above.
             WEBVIEW_LOG_STREAMING.store(settings.debug_mode, Ordering::Relaxed);
+            app.manage(wait_ipc::WaitResponseState::default());
             let app_handle = app.handle().clone();
             app.manage(TranscriptionCoordinator::new(app_handle.clone()));
 
             initialize_core_logic(&app_handle);
+
+            // When no GUI instance existed, the internal child launched by the
+            // blocking client becomes the primary instance. Start its original
+            // request here; otherwise the single-instance callback handles it.
+            // The hidden child has no frontend to call initialize_shortcuts(),
+            // so initialize them explicitly or the recording can never be
+            // stopped by the user's configured shortcut.
+            if cli_args.wait {
+                if let (Some(endpoint), Some(token)) =
+                    (cli_args.wait_endpoint.clone(), cli_args.wait_token.clone())
+                {
+                    if let Err(error) = commands::initialize_shortcuts(app_handle.clone()) {
+                        wait_ipc::WaitResponder::new(endpoint, token)
+                            .send_error(&format!("Failed to initialize shortcuts: {error}"));
+                        app_handle.exit(1);
+                        return Ok(());
+                    }
+                    app_handle
+                        .state::<TranscriptionCoordinator>()
+                        .start_recording_wait(
+                            cli_args.post_process,
+                            "CLI --wait",
+                            wait_ipc::WaitResponder::new(endpoint, token),
+                        );
+                }
+            }
 
             // Secure Input monitor (macOS): detects stuck secure input that
             // silently blocks keyed shortcuts, warns the user, and activates

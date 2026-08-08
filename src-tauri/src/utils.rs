@@ -1,6 +1,7 @@
 use crate::managers::audio::AudioRecordingManager;
 use crate::managers::transcription::TranscriptionManager;
 use crate::shortcut;
+use crate::wait_ipc::WaitResponseState;
 use crate::TranscriptionCoordinator;
 use log::info;
 use std::sync::Arc;
@@ -98,6 +99,9 @@ pub fn cancel_current_operation(app: &AppHandle) {
     // Notify coordinator so it can keep lifecycle state coherent.
     if let Some(coordinator) = app.try_state::<TranscriptionCoordinator>() {
         coordinator.notify_cancel(recording_was_active);
+    }
+    if let Some(wait) = app.try_state::<WaitResponseState>() {
+        wait.complete(Err("recording was cancelled".to_string()));
     }
 
     info!("Operation cancellation completed - returned to idle state");

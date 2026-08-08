@@ -7,6 +7,13 @@ use handy_app_lib::CliArgs;
 fn main() {
     let cli_args = CliArgs::parse();
 
+    // A waiting invocation remains the user-facing process. It launches a
+    // regular secondary Handy instance carrying a private response endpoint;
+    // the single-instance plugin forwards that request to the GUI instance.
+    if cli_args.wait && cli_args.wait_endpoint.is_none() {
+        std::process::exit(handy_app_lib::run_wait_client(&cli_args));
+    }
+
     #[cfg(target_os = "linux")]
     {
         // DMABUF renderer causes crashes on various GPU/display server configurations
