@@ -11,6 +11,7 @@ import { ModelSelect } from "../PostProcessingSettingsApi/ModelSelect";
 import type { SttBackend } from "@/bindings";
 import type { ModelOption } from "../PostProcessingSettingsApi/types";
 import type { DropdownOption } from "@/components/ui/Dropdown";
+import { SttPresets } from "./SttPresets";
 
 export const SttSettings: React.FC = () => {
   const { t } = useTranslation();
@@ -99,6 +100,7 @@ export const SttSettings: React.FC = () => {
 
   return (
     <div className="max-w-3xl w-full mx-auto space-y-6">
+      <SttPresets />
       <SettingsGroup title={t("settings.stt.title")}>
         <SettingContainer
           title={t("settings.stt.backend.title")}

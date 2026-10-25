@@ -1112,6 +1112,12 @@ pub fn change_post_process_enabled_setting(app: AppHandle, enabled: bool) -> Res
     settings.post_process_enabled = enabled;
     settings::write_settings(&app, settings.clone());
 
+    reconcile_post_process_enabled(&app, enabled);
+    Ok(())
+}
+
+pub(crate) fn reconcile_post_process_enabled(app: &AppHandle, enabled: bool) {
+    let settings = settings::get_settings(app);
     // Register or unregister the post-processing shortcut
     if let Some(binding) = settings
         .bindings
@@ -1125,8 +1131,7 @@ pub fn change_post_process_enabled_setting(app: AppHandle, enabled: bool) -> Res
         }
     }
 
-    crate::secure_input::reconcile_fallback(&app);
-    Ok(())
+    crate::secure_input::reconcile_fallback(app);
 }
 
 #[tauri::command]

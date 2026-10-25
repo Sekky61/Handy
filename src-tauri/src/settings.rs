@@ -10,8 +10,8 @@ use tauri_plugin_store::StoreExt;
 
 pub use crate::stt_settings::SttBackend;
 use crate::stt_settings::{
-    default_stt_api_keys, default_stt_models, default_stt_provider_id, default_stt_providers,
-    ensure_stt_defaults,
+    default_stt_api_keys, default_stt_models, default_stt_presets, default_stt_provider_id,
+    default_stt_providers, ensure_stt_defaults, SttPreset,
 };
 
 pub const APPLE_INTELLIGENCE_PROVIDER_ID: &str = "apple_intelligence";
@@ -521,6 +521,8 @@ pub struct AppSettings {
     pub stt_api_keys: SecretMap,
     #[serde(default = "default_stt_models")]
     pub stt_models: HashMap<String, String>,
+    #[serde(default = "default_stt_presets")]
+    pub stt_presets: Vec<SttPreset>,
     #[serde(default)]
     pub mute_while_recording: bool,
     #[serde(default)]
@@ -1128,6 +1130,7 @@ pub fn get_default_settings() -> AppSettings {
         stt_providers: default_stt_providers(),
         stt_api_keys: default_stt_api_keys(),
         stt_models: default_stt_models(),
+        stt_presets: default_stt_presets(),
         mute_while_recording: false,
         append_trailing_space: false,
         app_language: default_app_language(),

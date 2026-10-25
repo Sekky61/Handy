@@ -6,6 +6,25 @@ use std::collections::HashMap;
 pub const OPENROUTER_PROVIDER_ID: &str = "openrouter";
 pub const OPENROUTER_DEFAULT_STT_MODEL_ID: &str = "openai/whisper-large-v3-turbo";
 
+#[derive(Serialize, Deserialize, Debug, Clone, Type)]
+pub struct SttPreset {
+    pub id: String,
+    pub name: String,
+    pub backend: SttBackend,
+    /// Model ID for the active backend: the local catalog model or remote STT model.
+    pub model: String,
+    pub stt_provider_id: String,
+    pub post_process_enabled: bool,
+    pub post_process_provider_id: String,
+    pub post_process_model: String,
+    pub post_process_prompt_id: Option<String>,
+    pub post_process_disable_reasoning: bool,
+}
+
+pub fn default_stt_presets() -> Vec<SttPreset> {
+    Vec::new()
+}
+
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, Type)]
 #[serde(rename_all = "snake_case")]
 pub enum SttBackend {

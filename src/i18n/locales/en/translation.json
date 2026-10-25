@@ -681,6 +681,18 @@
     },
     "stt": {
       "title": "Speech to Text",
+      "presets": {
+        "title": "Experiment presets",
+        "description": "Save and switch complete STT and post-processing configurations. API keys remain in their existing settings.",
+        "namePlaceholder": "Preset name",
+        "saveCurrent": "Save current",
+        "empty": "No presets saved yet. Configure STT and post-processing below, then save the combination here.",
+        "postProcessingOff": "Post-processing off",
+        "use": "Use",
+        "update": "Update from current settings",
+        "delete": "Delete {{name}}",
+        "error": "Could not update the preset."
+      },
       "backend": {
         "title": "Backend",
         "description": "Choose whether Handy transcribes locally or sends recordings to OpenRouter STT.",
